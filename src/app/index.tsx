@@ -1,8 +1,10 @@
 import AnimatedInput from '@/components';
-import { useRouter } from 'expo-router';
+import { useRouter, Redirect } from 'expo-router';
 import { ArrowRight, Sparkles } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,7 +12,7 @@ import {
   StyleSheet,
   Text,
   useColorScheme,
-  View
+  View,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -18,14 +20,30 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '@/hooks/use-auth';
+import { useUserStore, useAppStore } from '@/store';
 
 export default function AuthScreen() {
   const router = useRouter();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const { user: fbUser, isLoading: isFbLoading, isAuthenticated: isFbAuth, signInWithGoogle, isSigningIn } = useAuth();
+  const { user: storeUser, isAuthenticated: isStoreAuth, isGuest } = useUserStore();
+  const { hasCompletedOnboarding } = useAppStore();
 
   const [guestName, setGuestName] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  // Declarative redirect for active/authenticated users
+  const isUserActive = !isFbLoading && ((isFbAuth && !!fbUser) || (isStoreAuth && (!!storeUser || isGuest)));
+
+  const navigateNext = useCallback(() => {
+    if (useAppStore.getState().hasCompletedOnboarding) {
+      router.replace('/(tabs)' as any);
+    } else {
+      router.replace('/onboarding' as any);
+    }
+  }, [router]);
 
   // Animated scale for primary button
   const buttonScale = useSharedValue(1);
@@ -39,9 +57,29 @@ export default function AuthScreen() {
     transform: [{ scale: googleScale.value }],
   }));
 
+  if (isUserActive) {
+    return <Redirect href={hasCompletedOnboarding ? ('/(tabs)' as any) : ('/onboarding' as any)} />;
+  }
+
   const handleContinue = () => {
-    // Navigate directly to home tabs
-    router.replace('/(tabs)' as any);
+    // Save guest profile in global Zustand store
+    useUserStore.getState().setGuest(guestName.trim() || 'Guest Explorer');
+    navigateNext();
+  };
+
+  const handleGoogleSignIn = async () => {
+    const result = await signInWithGoogle();
+    if (result.success) {
+      useUserStore.getState().setUser({
+        uid: result.firebaseUser.uid,
+        email: result.firebaseUser.email || result.googleUser?.email || null,
+        displayName: result.firebaseUser.displayName || result.googleUser?.name || null,
+        photoURL: result.firebaseUser.photoURL || result.googleUser?.photo || null,
+      });
+      navigateNext();
+    } else if (!result.cancelled && result.error) {
+      Alert.alert('Sign-In Failed', result.error);
+    }
   };
 
   return (
@@ -60,7 +98,7 @@ export default function AuthScreen() {
           <View style={styles.headerContainer}>
             <View style={styles.logoRow}>
               <Text style={[styles.logoText, { color: '#000000' }]}>
-                Savio
+                Looop
               </Text>
               <View style={styles.sparkleBadge}>
                 <Sparkles size={14} color="#000000" />
@@ -164,27 +202,33 @@ export default function AuthScreen() {
               {/* Secondary Google Button */}
               <Animated.View style={googleAnimatedStyle}>
                 <Pressable
-                  onPressIn={() => (googleScale.value = withSpring(0.97))}
-                  onPressOut={() => (googleScale.value = withSpring(1))}
-                  onPress={handleContinue}
+                  onPressIn={() => !isSigningIn && (googleScale.value = withSpring(0.97))}
+                  onPressOut={() => !isSigningIn && (googleScale.value = withSpring(1))}
+                  onPress={handleGoogleSignIn}
+                  disabled={isSigningIn}
                   style={[
                     styles.secondaryButton,
                     {
                       backgroundColor: '#FFFFFF',
                       borderColor: 'rgba(0, 0, 0, 0.25)',
+                      opacity: isSigningIn ? 0.7 : 1,
                     },
                   ]}
                 >
-                  <View style={styles.googleGContainer}>
-                    <Text style={styles.googleG}>G</Text>
-                  </View>
+                  {isSigningIn ? (
+                    <ActivityIndicator size="small" color="#000000" style={{ marginRight: 10 }} />
+                  ) : (
+                    <View style={styles.googleGContainer}>
+                      <Text style={styles.googleG}>G</Text>
+                    </View>
+                  )}
                   <Text
                     style={[
                       styles.secondaryButtonText,
                       { color: '#000000' },
                     ]}
                   >
-                    Continue with Google
+                    {isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}
                   </Text>
                 </Pressable>
               </Animated.View>
@@ -221,6 +265,7 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: '#FAF9F6',
   },
   keyboardView: {
     flex: 1,

@@ -1,18 +1,25 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { useColorScheme, View, StyleSheet } from 'react-native';
-import { Home, ReceiptText, Plus, Target, User } from 'lucide-react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { Home, Plus, ReceiptText, Target, User } from 'lucide-react-native';
+import { StyleSheet, useColorScheme, View, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const isDark = false; // Forced light theme
 
-  const activeColor = '#546B41';
-  const inactiveColor = '#99AD7A';
+  const activeColor = '#7C3AED';
+  const inactiveColor = '#94A3B8';
   const bg = '#FFFFFF';
-  const borderColor = 'rgba(84, 107, 65, 0.15)';
-  const addBtnBg = '#546B41';
+  const borderColor = '#E2E8F0';
+  const addBtnBg = '#7C3AED';
   const addBtnIconColor = '#FFFFFF';
+
+  // Dynamic bottom padding accounting for native Android buttons & iOS home bar
+  const bottomInset = insets.bottom;
+  const bottomPadding = bottomInset > 0 ? bottomInset + 6 : (Platform.OS === 'android' ? 16 : 10);
+  const tabHeight = 58 + bottomPadding;
 
   return (
     <Tabs
@@ -24,10 +31,10 @@ export default function TabLayout() {
           backgroundColor: bg,
           borderTopColor: borderColor,
           borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 6,
-          elevation: 8,
+          height: tabHeight,
+          paddingBottom: bottomPadding,
+          paddingTop: 8,
+          elevation: 10,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.06,
@@ -36,6 +43,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          marginTop: 2,
         },
       }}
     >
@@ -55,6 +63,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="add"
+        listeners={() => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push('/record-expense');
+          },
+        })}
         options={{
           title: '',
           tabBarIcon: () => (
@@ -86,14 +100,14 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 48,
     height: 48,
-    borderRadius: 16,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -8,
-    shadowColor: '#000',
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
   },
 });

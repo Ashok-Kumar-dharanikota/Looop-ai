@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
-import { ChevronRight, ChevronDown } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  FadeInDown,
+  FadeOutUp,
+  LinearTransition,
+} from 'react-native-reanimated';
+import { ChevronDown } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAppStore } from '@/store';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Food & Dining': '#FF6B6B',
-  'Transport': '#4ECDC4',
-  'Shopping': '#FFE66D',
-  'Bills': '#8B5CF6',
-  'Income': '#22C55E',
+  'Food & Dining': '#FF5252',
+  'Transport': '#00B8D9',
+  'Shopping': '#FFAB00',
+  'Bills': '#7C3AED',
+  'Income': '#10B981',
+  'Entertainment': '#EC4899',
+  'Health': '#3B82F6',
 };
 
-const getCatColor = (cat: string) => CATEGORY_COLORS[cat] || '#A78BFA';
+const getCatColor = (cat: string) => CATEGORY_COLORS[cat] || '#8B5CF6';
 
-interface Transaction {
+export interface Transaction {
   id: string;
   title: string;
   time: string;
@@ -22,280 +34,407 @@ interface Transaction {
   icon: any;
 }
 
-interface DailySummaryProps {
+export interface DailySummaryProps {
+  id?: string;
+  date?: {
+    month: string;
+    day: string;
+  };
   transactions: Transaction[];
+  defaultExpanded?: boolean;
 }
 
-export const DailySummary: React.FC<DailySummaryProps> = ({ transactions }) => {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
-  const [expanded, setExpanded] = useState(false);
+const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
 
-  const textPrimary = isDark ? '#FFFFFF' : '#0F0F14';
-  const textSecondary = isDark ? '#9CA3AF' : '#6B7280';
-  const borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : '#EAEAEA';
-  const cardBg = isDark ? '#1C1C24' : '#FFFFFF'; // slightly lighter than page bg for contrast
-  const dateBg = '#1E1E24'; 
-  const trackBg = isDark ? 'rgba(255,255,255,0.05)' : '#F3F4F6';
-  const iconBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : '#F4F4F7';
+const AnimatedBar = ({ percentage, color }: { percentage: number, color: string }) => {
+  const height = useSharedValue(0);
+
+  React.useEffect(() => {
+    height.value = withTiming(Math.max(percentage, 8), { duration: 600 });
+  }, [percentage]);
+
+  const style = useAnimatedStyle(() => {
+    return {
+      height: `${height.value}%`,
+      width: '100%',
+      borderRadius: 4,
+    };
+  });
+
+  return (
+    <AnimatedGradient
+      colors={['#000000', '#00000080']}
+      style={style}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+    />
+  );
+};
+
+export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
+  date = { month: 'AUG', day: '04' },
+  transactions,
+  defaultExpanded = false,
+}) => {
+  const { currencySymbol = '₹' } = useAppStore();
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const rotation = useSharedValue(defaultExpanded ? 180 : 0);
+
+  const toggleExpanded = () => {
+    const nextState = !expanded;
+    setExpanded(nextState);
+    rotation.value = withTiming(nextState ? 180 : 0, { duration: 250 });
+  };
+
+  const animatedChevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
 
   // Calculate totals and chart data
-  const { totalExpense, categoryData } = React.useMemo(() => {
-    let total = 0;
+  const { totalExpense, totalIncome, categoryData } = React.useMemo(() => {
+    let expenseSum = 0;
+    let incomeSum = 0;
     const catMap: Record<string, number> = {};
 
-    transactions.forEach(t => {
+    transactions.forEach((t) => {
       if (t.type === 'expense') {
         const amt = Math.abs(t.amount);
-        total += amt;
+        expenseSum += amt;
         catMap[t.category] = (catMap[t.category] || 0) + amt;
+      } else {
+        incomeSum += Math.abs(t.amount);
       }
     });
 
     const chart = Object.entries(catMap).map(([name, amount]) => ({
       name,
       amount,
-      percentage: total > 0 ? (amount / total) * 100 : 0,
+      percentage: expenseSum > 0 ? Math.round((amount / expenseSum) * 100) : 0,
       color: getCatColor(name),
     }));
 
-    return { totalExpense: total, categoryData: chart };
+    return { totalExpense: expenseSum, totalIncome: incomeSum, categoryData: chart };
   }, [transactions]);
 
-  // Find max category for message
-  const maxCat = categoryData.length > 0 
-    ? categoryData.reduce((prev, current) => (prev.amount > current.amount) ? prev : current).name 
-    : '';
+  // Find category with highest spend
+  const maxCat =
+    categoryData.length > 0
+      ? categoryData.reduce((prev, current) => (prev.amount > current.amount ? prev : current)).name
+      : '';
+
+  const summaryHeading =
+    totalExpense > 0
+      ? `${currencySymbol}${totalExpense.toLocaleString('en-IN')}`
+      : totalIncome > 0
+      ? `+${currencySymbol}${totalIncome.toLocaleString('en-IN')}`
+      : `${currencySymbol}0`;
+
+  const summarySubtitle = maxCat
+    ? `${transactions.length} ${transactions.length === 1 ? 'entry' : 'entries'} • Highest on ${maxCat}`
+    : totalIncome > 0
+    ? `${transactions.length} credit ${transactions.length === 1 ? 'entry' : 'entries'}`
+    : 'No transactions';
+
+  const headingColor = totalExpense > 0 ? '#EF4444' : totalIncome > 0 ? '#10B981' : '#0F172A';
 
   return (
-    <View style={[styles.container, { borderColor, backgroundColor: cardBg }]}>
-      <TouchableOpacity 
+    <Animated.View layout={LinearTransition.duration(250)} style={styles.container}>
+      {/* Card Header (Tap to toggle) */}
+      <TouchableOpacity
         style={styles.header}
-        activeOpacity={0.7}
-        onPress={() => setExpanded(!expanded)}
+        activeOpacity={0.75}
+        onPress={toggleExpanded}
       >
-        <View style={[styles.dateSquare, { backgroundColor: dateBg }]}>
-          <Text style={styles.monthText}>AUG</Text>
-          <Text style={styles.dayText}>04</Text>
+        <View style={styles.dateTimeline}>
+          <Text style={styles.monthText}>{date.month}</Text>
+          <Text style={styles.dayText}>{date.day}</Text>
         </View>
 
         <View style={styles.summaryContent}>
-          <Text style={[styles.summaryTitle, { color: textPrimary }]}>₹{totalExpense.toLocaleString()} Spent Today</Text>
-          <Text style={[styles.summaryMessage, { color: textSecondary }]} numberOfLines={2}>
-            {maxCat ? `You've spent the most on ${maxCat} today.` : 'No expenses recorded today.'}
+          <Text style={[styles.summaryTitle, { color: headingColor }]} numberOfLines={1}>
+            {summaryHeading}
+          </Text>
+          <Text style={styles.summaryMessage} numberOfLines={1}>
+            {summarySubtitle}
           </Text>
         </View>
 
         <View style={styles.iconContainer}>
-          {expanded ? (
-            <ChevronDown size={20} color={textSecondary} />
-          ) : (
-            <ChevronRight size={20} color={textSecondary} />
-          )}
+          <Animated.View style={[styles.chevronBadge, animatedChevronStyle]}>
+            <ChevronDown size={16} color="#64748B" strokeWidth={2.5} />
+          </Animated.View>
         </View>
       </TouchableOpacity>
 
+      {/* Expanded Content */}
       {expanded && (
-        <View style={[styles.dropdownContent, { borderTopColor: borderColor }]}>
-          <Text style={[styles.chartTitle, { color: textPrimary }]}>Spending by Category</Text>
-          
-          {/* Vertical Bar Chart */}
-          {categoryData.length > 0 ? (
-            <View style={styles.chartContainer}>
-              {categoryData.map((data, index) => (
-                <View key={index} style={styles.chartCol}>
-                  <Text style={[styles.chartAmount, { color: textSecondary }]}>₹{data.amount}</Text>
-                  <View style={[styles.barTrack, { backgroundColor: trackBg }]}>
-                    <View 
-                      style={[
-                        styles.barFill, 
-                        { height: `${data.percentage}%`, backgroundColor: data.color }
-                      ]} 
-                    />
+        <Animated.View
+          entering={FadeInDown.duration(280).springify()}
+          exiting={FadeOutUp.duration(180)}
+          layout={LinearTransition.duration(250)}
+          style={styles.dropdownContent}
+        >
+          {/* Multi-Segment Proportion Bar */}
+          {categoryData.length > 0 && (
+            <View style={styles.chartSection}>
+              <View style={styles.segmentBarWrapper}>
+                {categoryData.map((cat, idx) => (
+                  <View
+                    key={cat.name}
+                    style={[
+                      styles.segmentBarPart,
+                      {
+                        flex: Math.max(cat.percentage, 5),
+                        backgroundColor: cat.color,
+                        borderTopLeftRadius: idx === 0 ? 5 : 0,
+                        borderBottomLeftRadius: idx === 0 ? 5 : 0,
+                        borderTopRightRadius: idx === categoryData.length - 1 ? 5 : 0,
+                        borderBottomRightRadius: idx === categoryData.length - 1 ? 5 : 0,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+
+              <View style={styles.categoryPillsRow}>
+                {categoryData.slice(0, 3).map((cat) => (
+                  <View key={cat.name} style={styles.catMiniChip}>
+                    <View style={[styles.catDot, { backgroundColor: cat.color }]} />
+                    <Text style={styles.catMiniChipName} numberOfLines={1}>
+                      {cat.name}
+                    </Text>
+                    <Text style={styles.catMiniChipAmt}>
+                      {currencySymbol}{cat.amount.toLocaleString('en-IN')}
+                    </Text>
                   </View>
-                  <Text style={[styles.chartLabel, { color: textSecondary }]} numberOfLines={1}>
-                    {data.name}
-                  </Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
-          ) : (
-            <Text style={{ color: textSecondary, marginBottom: 20 }}>No category data to display.</Text>
           )}
 
           {/* Transaction List */}
           <View style={styles.listContainer}>
-            <Text style={[styles.listTitle, { color: textPrimary }]}>All Transactions</Text>
-            {transactions.map((item) => {
+            {transactions.map((item, idx) => {
               const IconComp = item.icon;
               const isIncome = item.type === 'income';
-              const formattedAmount = isIncome ? `+₹${item.amount.toLocaleString()}` : `-₹${Math.abs(item.amount).toLocaleString()}`;
-              return (
-                <View key={item.id} style={styles.txCard}>
-                  <View
-                    style={[
-                      styles.iconCircle,
-                      { backgroundColor: isIncome ? 'rgba(34, 197, 94, 0.15)' : iconBtnBg },
-                    ]}
-                  >
-                    <IconComp size={18} color={isIncome ? '#22C55E' : textPrimary} />
-                  </View>
+              const formattedAmount = isIncome
+                ? `+${currencySymbol}${item.amount.toLocaleString('en-IN')}`
+                : `-${currencySymbol}${Math.abs(item.amount).toLocaleString('en-IN')}`;
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.txTitle, { color: textPrimary }]}>{item.title}</Text>
-                    <Text style={[styles.txSub, { color: textSecondary }]}>
-                      {item.time} • {item.category}
+              const itemColor = isIncome ? '#10B981' : getCatColor(item.category);
+              const itemBgColor = `${itemColor}15`;
+
+              const cleanTime = item.time.includes(',') ? item.time.split(', ').pop() : item.time;
+
+              return (
+                <View key={item.id}>
+                  {idx > 0 && <View style={styles.txDivider} />}
+                  <View style={styles.txCard}>
+                    <View
+                      style={[
+                        styles.iconCircle,
+                        { backgroundColor: itemBgColor },
+                      ]}
+                    >
+                      <IconComp size={18} color={itemColor} strokeWidth={2.2} />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.txTitle} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <Text style={styles.txSub} numberOfLines={1}>
+                        {cleanTime} • {item.category}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        styles.txAmount,
+                        { color: isIncome ? '#10B981' : '#0F172A' },
+                      ]}
+                    >
+                      {formattedAmount}
                     </Text>
                   </View>
-
-                  <Text
-                    style={[
-                      styles.txAmount,
-                      { color: isIncome ? '#22C55E' : textPrimary },
-                    ]}
-                  >
-                    {formattedAmount}
-                  </Text>
                 </View>
               );
             })}
-            {transactions.length === 0 && (
-              <Text style={{ color: textSecondary, textAlign: 'center', marginTop: 10 }}>No transactions found.</Text>
-            )}
           </View>
-        </View>
+        </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderRadius: 0,
-    marginTop: 10,
-    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    borderRadius: 18,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    overflow: 'hidden',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1.5,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    minHeight: 44,
   },
-  dateSquare: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+  dateTimeline: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   monthText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#9CA3AF',
+    fontWeight: '800',
+    color: '#7C3AED',
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   dayText: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
-    marginTop: 2,
+    color: '#0F172A',
+    marginTop: 1,
   },
   summaryContent: {
     flex: 1,
     justifyContent: 'center',
   },
   summaryTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    marginBottom: 4,
+    color: '#0F172A',
+    marginBottom: 2,
+    fontVariant: ['tabular-nums'],
   },
   summaryMessage: {
     fontSize: 12,
-    lineHeight: 16,
+    fontWeight: '500',
+    color: '#64748B',
   },
   iconContainer: {
-    paddingLeft: 12,
+    paddingLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  chevronBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   dropdownContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 12,
     borderTopWidth: 1,
+    borderTopColor: '#F8FAFC',
+    backgroundColor: '#FAFAFC',
   },
-  chartTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 20,
+  chartSection: {
+    marginBottom: 12,
   },
-  chartContainer: {
+  segmentBarWrapper: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end',
-    height: 160,
-    marginBottom: 30,
-    paddingHorizontal: 10,
+    height: 6,
+    borderRadius: 5,
+    overflow: 'hidden',
+    backgroundColor: '#E2E8F0',
+    gap: 2,
   },
-  chartCol: {
+  segmentBarPart: {
+    height: '100%',
+  },
+  categoryPillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 10,
+  },
+  catMiniChip: {
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 50,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    gap: 5,
   },
-  chartAmount: {
+  catDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  catMiniChipName: {
     fontSize: 11,
     fontWeight: '600',
-    marginBottom: 8,
+    color: '#475569',
   },
-  barTrack: {
-    width: 14,
-    height: 110,
-    borderRadius: 7,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  barFill: {
-    width: '100%',
-    borderRadius: 7,
-  },
-  chartLabel: {
+  catMiniChipAmt: {
     fontSize: 11,
-    fontWeight: '500',
-    marginTop: 8,
-    textAlign: 'center',
+    fontWeight: '700',
+    color: '#0F172A',
+    fontVariant: ['tabular-nums'],
   },
   listContainer: {
-    marginTop: 10,
-    gap: 12,
-  },
-  listTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 6,
+    marginTop: 2,
   },
   txCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
     gap: 12,
-    paddingVertical: 4,
   },
   iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: 'center',
     alignItems: 'center',
   },
   txTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0F172A',
   },
   txSub: {
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#64748B',
     marginTop: 2,
   },
   txAmount: {
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  txDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 2,
   },
 });

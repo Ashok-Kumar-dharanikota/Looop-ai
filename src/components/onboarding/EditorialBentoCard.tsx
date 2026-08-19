@@ -71,7 +71,7 @@ export const EditorialBentoCard: React.FC<EditorialBentoCardProps> = ({ compact 
             <BookOpen size={14} color={bgColor} />
           </View>
           <View>
-            <Text style={[styles.authorName, { color: fgColor }]}>Savio Editorial</Text>
+            <Text style={[styles.authorName, { color: fgColor }]}>Looop Editorial</Text>
             <Text style={[styles.authorRole, { color: fgMuted }]}>Curated Wealth Guides</Text>
           </View>
         </View>

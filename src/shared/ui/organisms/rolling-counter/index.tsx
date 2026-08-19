@@ -18,7 +18,7 @@ import { scheduleOnRN } from "react-native-worklets";
 import { LinearGradient } from "expo-linear-gradient";
 
 const AnimatedBlur =
-  Animated.createAnimatedComponent<Partial<BlurViewProps>>(BlurView);
+  Animated.createAnimatedComponent(BlurView as any);
 
 const getDigitAtPlace = <T extends number, I extends number>(
   num: T,
@@ -67,7 +67,7 @@ const CounterDigit: FC<IReusableDigit> = memo<IReusableDigit>(
       },
     );
 
-    const blurEffectPropz = useAnimatedProps<Pick<BlurViewProps, "intensity">>(
+    const blurEffectPropz = useAnimatedProps<any>(
       () => {
         const targetY = -height * currentDigit.value;
         const delta = Math.abs(slideY.value - targetY);
@@ -81,9 +81,7 @@ const CounterDigit: FC<IReusableDigit> = memo<IReusableDigit>(
       },
     );
 
-    const animatedAndroidBlurStylez = useAnimatedStyle<
-      Required<Partial<Pick<ViewStyle, "filter">>>
-    >(() => {
+    const animatedAndroidBlurStylez = useAnimatedStyle<any>(() => {
       const targetY = -height * currentDigit.value;
       const delta = Math.abs(slideY.value - targetY);
       const isMoving = delta > 0.5;

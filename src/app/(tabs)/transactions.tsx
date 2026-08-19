@@ -1,22 +1,16 @@
 import React from 'react';
-import { ScrollView, StyleSheet, useColorScheme } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { TransactionsTab } from '@/components/tabs/TransactionsTab';
 
 export default function TransactionsScreen() {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
-  // Applying the requested vibrant theme changes later, for now just fixing layout
-  const bg = isDark ? '#111218' : '#FAFAFC'; 
-
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: bg }]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
         <TransactionsTab />
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -24,10 +18,10 @@ export default function TransactionsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingTop: 12,
-    paddingBottom: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFC',
   },
 });
