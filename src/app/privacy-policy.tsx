@@ -103,7 +103,7 @@ export default function PrivacyPolicyScreen() {
           <View style={[styles.section, { borderBottomWidth: 0, paddingBottom: 0 }]}>
             <Text style={styles.sectionTitle}>7. Contact Our Privacy Team</Text>
             <Text style={styles.paragraph}>
-              If you have questions regarding this Privacy Policy or our security infrastructure, please contact us at privacy@looop.app.
+              If you have questions regarding this Privacy Policy or our security infrastructure, please contact us directly at ashok.d.paul@gmail.com.
             </Text>
           </View>
         </View>

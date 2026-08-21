@@ -93,14 +93,14 @@ export default function TermsOfUseScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>6. Intellectual Property Rights</Text>
             <Text style={styles.paragraph}>
-              All visual assets, typography implementations, design tokens, trademarks, logos, algorithms, and editorial formats within Looop are the proprietary intellectual property of Looop Inc. and are protected by applicable copyright and trademark laws.
+              All visual assets, typography implementations, design tokens, trademarks, logos, algorithms, and editorial formats within Looop are the proprietary intellectual property of Cornerstone Studio and are protected by applicable copyright and trademark laws.
             </Text>
           </View>
 
           <View style={[styles.section, { borderBottomWidth: 0, paddingBottom: 0 }]}>
             <Text style={styles.sectionTitle}>7. Contact Us</Text>
             <Text style={styles.paragraph}>
-              For legal inquiries, terms clarification, or support requests, please reach out to our team at legal@looop.app.
+              For legal inquiries, terms clarification, or support requests, please reach out to our team at ashok.d.paul@gmail.com.
             </Text>
           </View>
         </View>

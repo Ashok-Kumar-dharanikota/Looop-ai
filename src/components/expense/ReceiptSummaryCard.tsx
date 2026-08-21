@@ -8,6 +8,8 @@ import {
   ChevronDown,
   Edit3,
   CheckCircle2,
+  Zap,
+  Cpu,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Dropdown from '@/shared/ui/organisms/dropdown';
@@ -67,6 +69,7 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
   }
 
   const IconComp = selectedCategory?.icon;
+  const isAIParsed = Boolean(parsedNLPResult?.isAIParsed);
 
   return (
     <View style={styles.container}>
@@ -93,26 +96,27 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           </View>
         </View>
 
+        {/* Dynamic Engine Pill Badge */}
         <View
           style={[
             styles.receiptStatusPill,
-            parsedNLPResult?.isAIParsed
-              ? { backgroundColor: '#F3E8FF', borderColor: '#E9D5FF' }
-              : { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' },
+            isAIParsed
+              ? { backgroundColor: '#f3e8ff', borderColor: '#7c3aed' }
+              : { backgroundColor: '#fef3c7', borderColor: '#d97706' },
           ]}
         >
-          {parsedNLPResult?.isAIParsed ? (
-            <Sparkles size={12} color="#9333EA" />
+          {isAIParsed ? (
+            <Sparkles size={12} color="#7c3aed" />
           ) : (
-            <Receipt size={12} color="#059669" />
+            <Zap size={12} color="#d97706" />
           )}
           <Text
             style={[
               styles.receiptStatusText,
-              parsedNLPResult?.isAIParsed ? { color: '#9333EA' } : { color: '#059669' },
+              isAIParsed ? { color: '#7c3aed' } : { color: '#d97706' },
             ]}
           >
-            {parsedNLPResult?.isAIParsed ? 'SMART LOG' : 'VERIFIED'}
+            {isAIParsed ? 'GEMINI AI' : 'LOCAL PARSER'}
           </Text>
         </View>
       </View>
@@ -202,6 +206,44 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
         </View>
       </View>
 
+      {/* AI vs Local Parser Provenance Indicator Banner */}
+      <View
+        style={[
+          styles.engineProvenanceCard,
+          isAIParsed ? styles.engineProvenanceCardAi : styles.engineProvenanceCardFallback,
+        ]}
+      >
+        <View
+          style={[
+            styles.engineIconBox,
+            isAIParsed ? { backgroundColor: '#EDE9FE' } : { backgroundColor: '#FEF3C7' },
+          ]}
+        >
+          {isAIParsed ? (
+            <Sparkles size={14} color="#7C3AED" />
+          ) : (
+            <Zap size={14} color="#D97706" />
+          )}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={[
+              styles.engineTitle,
+              isAIParsed ? { color: '#7C3AED' } : { color: '#D97706' },
+            ]}
+          >
+            {isAIParsed
+              ? `Parsed via Firebase AI (${parsedNLPResult?.aiModelUsed || 'Gemini 3.5 Flash-Lite'})`
+              : 'Parsed via Local Pattern Parser (Offline Fallback)'}
+          </Text>
+          <Text style={styles.engineSubtitle}>
+            {isAIParsed
+              ? 'App Check authenticated • Real-time Gemini extraction'
+              : 'Firebase AI offline or unavailable • Rule-based match'}
+          </Text>
+        </View>
+      </View>
+
       {/* Barcode & Edit / Save Actions */}
       <View style={styles.receiptBarcodeDecoration}>
         <View style={styles.barcodeLinesMock} />
@@ -232,6 +274,42 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
 });
 
 const styles = StyleSheet.create({
+  engineProvenanceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  engineProvenanceCardAi: {
+    backgroundColor: '#FAF5FF',
+    borderColor: '#E9D5FF',
+  },
+  engineProvenanceCardFallback: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
+  engineIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  engineTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  engineSubtitle: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: '#64748B',
+    marginTop: 1,
+  },
   container: {
     width: '100%',
   },
@@ -465,7 +543,7 @@ const styles = StyleSheet.create({
   dropdownOptionText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#334155',
+    color: '#475569',
   },
   dropdownOptionTextSelected: {
     color: '#9333EA',

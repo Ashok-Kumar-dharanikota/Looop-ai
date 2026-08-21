@@ -37,6 +37,12 @@ export interface ExpenseAIContextOptions {
   userHints?: string;
 }
 
+import Constants from 'expo-constants';
+import * as Updates from 'expo-updates';
+
+export const PREVIEW_APPCHECK_DEBUG_TOKEN = '90C2C9E8-5F63-4A15-88E1-216179365622';
+export const DEV_APPCHECK_DEBUG_TOKEN = '1D1EFB38-3D56-4B8D-9BD0-9D55F386C873';
+
 // Token-efficient active Gemini models in order of priority
 const CANDIDATE_GEMINI_MODELS = [
   'gemini-3.5-flash-lite',
@@ -48,27 +54,47 @@ let appCheckInstance: AppCheck | null = null;
 
 /**
  * Initializes and returns the Firebase App Check instance.
- * Configured with debug provider in development and native platform integrity in production.
+ * Automatically uses debug provider in development and preview builds,
+ * and native platform integrity (Play Integrity / DeviceCheck) in production.
  */
 export function getAppCheckInstance(): AppCheck | null {
   if (appCheckInstance) return appCheckInstance;
   try {
+    const appVariant =
+      Constants.expoConfig?.extra?.appVariant ||
+      process.env.EXPO_PUBLIC_APP_VARIANT ||
+      process.env.APP_VARIANT;
+
+    const isPreview =
+      appVariant === 'preview' ||
+      Updates.channel === 'preview' ||
+      Constants.expoConfig?.android?.package?.includes('preview') ||
+      Constants.expoConfig?.ios?.bundleIdentifier?.includes('preview');
+
+    const isProduction =
+      appVariant === 'production' ||
+      Updates.channel === 'production';
+
+    // The debug token for Preview and Dev builds
     const debugToken =
       process.env.EXPO_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN ||
-      '1D1EFB38-3D56-4B8D-9BD0-9D55F386C873';
+      (isPreview ? PREVIEW_APPCHECK_DEBUG_TOKEN : DEV_APPCHECK_DEBUG_TOKEN);
+
+    // Use 'debug' provider for all non-production builds (preview APKs, EAS development builds, local development)
+    const useDebugProvider = __DEV__ || isPreview || !isProduction;
 
     const rnfbProvider = new ReactNativeFirebaseAppCheckProvider();
     rnfbProvider.configure({
       android: {
-        provider: __DEV__ ? 'debug' : 'playIntegrity',
+        provider: useDebugProvider ? 'debug' : 'playIntegrity',
         debugToken,
       },
       apple: {
-        provider: __DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback',
+        provider: useDebugProvider ? 'debug' : 'appAttestWithDeviceCheckFallback',
         debugToken,
       },
       web: {
-        provider: __DEV__ ? 'debug' : 'reCaptchaV3',
+        provider: useDebugProvider ? 'debug' : 'reCaptchaV3',
         debugToken,
       },
     });
@@ -77,6 +103,7 @@ export function getAppCheckInstance(): AppCheck | null {
       provider: rnfbProvider,
       isTokenAutoRefreshEnabled: true,
     });
+    console.log(`🛡️ [Firebase App Check] Initialized with ${useDebugProvider ? `DEBUG provider (${debugToken.slice(0, 8)}...)` : 'Play Integrity'}`);
     return appCheckInstance;
   } catch (err) {
     console.warn('App Check initialization notice:', err);

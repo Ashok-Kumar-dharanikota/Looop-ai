@@ -5,487 +5,600 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import {
-  BookOpen,
   ArrowRight,
   Sparkles,
   TrendingUp,
-  Brain,
-  ShieldAlert,
-  HeartPulse,
-  Coins,
+  ShieldCheck,
   CheckCircle2,
+  Zap,
+  Target,
+  Coins,
+  Wallet,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { UserAssessmentData } from './StoryAct2Questionnaire';
+import { UserOnboardingAnswers } from './StoryAct2Questionnaire';
 
 interface StoryAct3DiagnosisProps {
   currencySymbol: string;
-  data: UserAssessmentData;
-  onProceedToHabit: () => void;
+  answers: UserOnboardingAnswers;
+  onProceedToNext: () => void;
 }
 
 export const StoryAct3Diagnosis: React.FC<StoryAct3DiagnosisProps> = ({
   currencySymbol,
-  data,
-  onProceedToHabit,
+  answers,
+  onProceedToNext,
 }) => {
   const [isGenerating, setIsGenerating] = useState(true);
-  const [progressStage, setProgressStage] = useState(0);
+  const [calculationStep, setCalculationStep] = useState(0);
+  const [progressPercent, setProgressPercent] = useState(12);
 
-  const progressVal = useSharedValue(0);
+  const progressVal = useSharedValue(0.12);
+
+  const incomeNum = parseFloat((answers.monthlyIncome || '75000').replace(/[^0-9.]/g, '')) || 75000;
+  const savingsNum = parseFloat((answers.monthlySavingsTarget || '15000').replace(/[^0-9.]/g, '')) || 15000;
+  const obligationsNum = answers.totalMustPayments || 0;
+
+  // Discretionary pool & daily safe spend calculation
+  const discretionaryPool = Math.max(0, incomeNum - savingsNum - obligationsNum);
+  const dailySafeSpend = Math.max(100, Math.round(discretionaryPool / 30));
+  const annualSavings = savingsNum * 12;
 
   useEffect(() => {
-    progressVal.value = withTiming(1, { duration: 2400 });
+    progressVal.value = withTiming(1, { duration: 2500 });
 
-    const timer1 = setTimeout(() => {
-      setProgressStage(1);
+    const interval = setInterval(() => {
+      setProgressPercent((prev) => {
+        if (prev >= 98) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 14;
+      });
+    }, 300);
+
+    const t1 = setTimeout(() => {
+      setCalculationStep(1);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }, 800);
+    }, 700);
 
-    const timer2 = setTimeout(() => {
-      setProgressStage(2);
+    const t2 = setTimeout(() => {
+      setCalculationStep(2);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }, 1600);
+    }, 1400);
 
-    const timer3 = setTimeout(() => {
+    const t3 = setTimeout(() => {
+      setCalculationStep(3);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, 2100);
+
+    const t4 = setTimeout(() => {
       setIsGenerating(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }, 2500);
+    }, 2600);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+      clearInterval(interval);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
     };
-  }, []);
+  }, [progressVal]);
 
-  const annualLeak = data.leakEstimatedCost * 12;
+  const progressAnimatedStyle = useAnimatedStyle(() => ({
+    width: `${progressVal.value * 100}%`,
+  }));
 
-  // Customized Hook Titles based on user leak
-  const getArticleContent = () => {
-    switch (data.leakCategory) {
-      case 'food_delivery':
-        return {
-          title: `The Midnight Delivery Paradox: Why ${currencySymbol}${annualLeak.toLocaleString('en-IN')} Leaks in 11:30 PM Fatigue Spends`,
-          subtitle: `Why impulse food orders feel innocent after a long workday, but rob both your morning vitality and your dream milestone savings.`,
-          leakExplanation: `Our spending is driven by emotional fatigue, not balance sheets. After 9 hours of screen time, willpower drops to zero, making late food orders feel like the only reward.`,
-          habitSolution: `Instead of an impossible strict diet, Looop will assign 2-day micro challenges like "Cook dinner at home on Thu & Fri" to reclaim ${currencySymbol}${data.leakEstimatedCost.toLocaleString('en-IN')}/month.`,
-        };
-      case 'cabs_commute':
-        return {
-          title: `The Peak Surge Trap: Why ${currencySymbol}${annualLeak.toLocaleString('en-IN')} Slipped Into Rush-Hour Rides`,
-          subtitle: `How convenience friction quietly drains your wealth pool, and why switching just 2 morning rides reclaims freedom.`,
-          leakExplanation: `Peak surge pricing preys on morning rush anxiety. Tapping "Book Cab" becomes an unconscious habit loop that costs ${currencySymbol}${data.leakEstimatedCost.toLocaleString('en-IN')} each month.`,
-          habitSolution: `Looop assigns micro-commute tasks like "Take the express metro on Tuesday morning" to turn wasted surge fees into your milestone vault.`,
-        };
-      case 'coffee_cafes':
-        return {
-          title: `The Daily Cafe Routine Mirage: How ${currencySymbol}${annualLeak.toLocaleString('en-IN')} Compounds Out of Sight`,
-          subtitle: `Daily artisanal brews provide quick comfort, but compound into delaying your biggest financial milestones.`,
-          leakExplanation: `Small friction-free card swipes under ${currencySymbol}300 bypass our brain's financial alarm system. Over a year, it creates a massive ${currencySymbol}${annualLeak.toLocaleString('en-IN')} hole.`,
-          habitSolution: `Looop challenges you to "Brew artisanal pour-over at home this weekend" to preserve quality of life while automatically saving.`,
-        };
-      case 'subscriptions':
-        return {
-          title: `The Digital Ghost Drain: Why Unused Subscriptions Take ${currencySymbol}${annualLeak.toLocaleString('en-IN')} From Your Future`,
-          subtitle: `Auto-renewing digital services quietly pull funds every month without you ever opening the apps.`,
-          leakExplanation: `Companies engineer auto-renewals because out-of-sight means out-of-mind. You pay for 6 services while actively using only 2.`,
-          habitSolution: `Looop runs an automatic recurring audit and gives you a 1-tap cancellation micro-task to instantly save ${currencySymbol}${data.leakEstimatedCost.toLocaleString('en-IN')}/month.`,
-        };
-      default:
-        return {
-          title: `The Impulse Gratification Loop: Reclaiming ${currencySymbol}${annualLeak.toLocaleString('en-IN')} With Tiny Friction Rules`,
-          subtitle: `Why spontaneous checkout swipes feel thrilling in the moment, but leave your bank balance empty by the 24th.`,
-          leakExplanation: `Instant checkout algorithms remove all payment friction, tricking our dopamine receptors into treating wants as emergencies.`,
-          habitSolution: `Looop applies a 48-Hour Cooling Task to let emotional spikes settle before purchasing.`,
-        };
-    }
-  };
-
-  const article = getArticleContent();
-
+  // Cal AI-style Calculation Loader
   if (isGenerating) {
     return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.aiGlowCircle}>
-          <Sparkles size={32} color="#7C3AED" />
-        </View>
-
-        <Text style={styles.loadingTitle}>Analyzing Your Financial Psychology</Text>
-        <Text style={styles.loadingSubtitle}>
-          Synthesizing behavioral patterns, friction leaks, and personalized AI diagnosis...
-        </Text>
-
-        {/* Dynamic Progress Steps */}
-        <View style={styles.progressStepsList}>
-          <View style={styles.progressStepItem}>
-            <CheckCircle2
-              size={18}
-              color={progressStage >= 0 ? '#059669' : '#CBD5E1'}
-            />
-            <Text
-              style={[
-                styles.progressStepText,
-                progressStage >= 0 && styles.progressStepTextActive,
-              ]}
-            >
-              Auditing friction leak: {data.leakCategoryName}
-            </Text>
+      <View style={styles.loaderContainer}>
+        <Animated.View entering={FadeIn.duration(300)} style={styles.loaderCenterBox}>
+          <View style={styles.sparkleHeroRing}>
+            <Sparkles size={28} color="#7C3AED" />
           </View>
 
-          <View style={styles.progressStepItem}>
-            <CheckCircle2
-              size={18}
-              color={progressStage >= 1 ? '#059669' : '#CBD5E1'}
-            />
-            <Text
-              style={[
-                styles.progressStepText,
-                progressStage >= 1 && styles.progressStepTextActive,
-              ]}
-            >
-              {data.totalMustPayments > 0
-                ? `Factoring ${currencySymbol}${data.totalMustPayments.toLocaleString('en-IN')}/mo fixed commitments & ${currencySymbol}${annualLeak.toLocaleString('en-IN')}/yr leak`
-                : `Calculating annual leak compounding (${currencySymbol}${annualLeak.toLocaleString('en-IN')}/yr)`}
-            </Text>
+          <Text style={styles.percentText}>{progressPercent}%</Text>
+          <Text style={styles.loaderHeadline}>Building your financial blueprint...</Text>
+
+          {/* Progress Track */}
+          <View style={styles.calcProgressBg}>
+            <Animated.View style={[styles.calcProgressFill, progressAnimatedStyle]} />
           </View>
 
-          <View style={styles.progressStepItem}>
-            <CheckCircle2
-              size={18}
-              color={progressStage >= 2 ? '#059669' : '#CBD5E1'}
-            />
-            <Text
-              style={[
-                styles.progressStepText,
-                progressStage >= 2 && styles.progressStepTextActive,
-              ]}
-            >
-              Drafting Edition #01 AI Financial Diagnosis Essay
-            </Text>
-          </View>
-        </View>
+          {/* Animated Checklist Steps */}
+          <View style={styles.checklistContainer}>
+            <View style={styles.checklistItem}>
+              <CheckCircle2
+                size={16}
+                color={calculationStep >= 0 ? '#059669' : '#CBD5E1'}
+              />
+              <Text
+                style={[
+                  styles.checklistText,
+                  calculationStep >= 0 && styles.checklistTextActive,
+                ]}
+              >
+                Balancing {currencySymbol}{incomeNum.toLocaleString('en-IN')} income against fixed spends
+              </Text>
+            </View>
 
-        <ActivityIndicator size="small" color="#7C3AED" style={{ marginTop: 24 }} />
+            <View style={styles.checklistItem}>
+              <CheckCircle2
+                size={16}
+                color={calculationStep >= 1 ? '#059669' : '#CBD5E1'}
+              />
+              <Text
+                style={[
+                  styles.checklistText,
+                  calculationStep >= 1 && styles.checklistTextActive,
+                ]}
+              >
+                Pacing {currencySymbol}{dailySafeSpend.toLocaleString('en-IN')}/day safe limit for {answers.primaryGoal || 'your goal'}
+              </Text>
+            </View>
+
+            <View style={styles.checklistItem}>
+              <CheckCircle2
+                size={16}
+                color={calculationStep >= 2 ? '#059669' : '#CBD5E1'}
+              />
+              <Text
+                style={[
+                  styles.checklistText,
+                  calculationStep >= 2 && styles.checklistTextActive,
+                ]}
+              >
+                Analyzing {answers.overspendingCategory || 'lifestyle'} spending triggers
+              </Text>
+            </View>
+
+            <View style={styles.checklistItem}>
+              <CheckCircle2
+                size={16}
+                color={calculationStep >= 3 ? '#059669' : '#CBD5E1'}
+              />
+              <Text
+                style={[
+                  styles.checklistText,
+                  calculationStep >= 3 && styles.checklistTextActive,
+                ]}
+              >
+                Personalized {answers.coachingTone || 'coaching'} plan ready!
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
       </View>
     );
   }
 
+  // Personalized Strategy Blueprint Screen
   return (
-    <View style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <Animated.View entering={FadeInUp.duration(350)} style={styles.articleCard}>
-          {/* Header Metadata */}
-          <View style={styles.articleHeaderRow}>
-            <View style={styles.articleTagBadge}>
-              <BookOpen size={13} color="#7C3AED" />
-              <Text style={styles.articleTagText}>YOUR PERSONALIZED AI DIAGNOSIS</Text>
-            </View>
-            <Text style={styles.articleReadTime}>3 min read</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Blueprint Header */}
+      <Animated.View entering={FadeInDown.duration(280)} style={styles.headerBox}>
+        <View style={styles.blueprintBadge}>
+          <Sparkles size={12} color="#7C3AED" />
+          <Text style={styles.blueprintBadgeText}>PERSONALIZED BLUEPRINT</Text>
+        </View>
+
+        <Text style={styles.mainTitle}>
+          The {answers.role || 'Mindful'} Wealth Plan
+        </Text>
+        <Text style={styles.subTitle}>
+          Tailored to allocate your {currencySymbol}{incomeNum.toLocaleString('en-IN')} income and reach {answers.primaryGoal || 'financial independence'} {answers.timeline ? `(${answers.timeline})` : ''}.
+        </Text>
+      </Animated.View>
+
+      {/* Hero Projected Savings Card */}
+      <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.heroMetricCard}>
+        <View style={styles.heroMetricHeader}>
+          <Text style={styles.heroMetricTag}>PROJECTED ANNUAL WEALTH SAVINGS</Text>
+          <View style={styles.trendBadge}>
+            <TrendingUp size={12} color="#059669" />
+            <Text style={styles.trendBadgeText}>ON TRACK</Text>
           </View>
+        </View>
 
-          {/* Hook Headline */}
-          <Text style={styles.articleTitle}>{article.title}</Text>
-          <Text style={styles.articleSubtitle}>{article.subtitle}</Text>
+        <Text style={styles.heroMetricValue}>
+          {currencySymbol}{annualSavings.toLocaleString('en-IN')}{' '}
+          <Text style={styles.heroMetricPeriod}>/ year</Text>
+        </Text>
 
-          {/* Key Metric Callout */}
-          <View style={styles.leakCalloutBox}>
-            <View style={styles.leakCalloutIconBox}>
-              <ShieldAlert size={22} color="#EF4444" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.leakCalloutLabel}>UNCONSCIOUS ANNUAL LEAK</Text>
-              <Text style={styles.leakCalloutAmount}>
-                -{currencySymbol}{annualLeak.toLocaleString('en-IN')}/year
-              </Text>
-              <Text style={styles.leakCalloutSub}>
-                Reclaiming this through tiny AI tasks will fully fund your primary milestone goal.
-              </Text>
-            </View>
+        <Text style={styles.heroMetricDescription}>
+          After funding {currencySymbol}{obligationsNum.toLocaleString('en-IN')} fixed obligations (Rent, EMIs), leaving {currencySymbol}{dailySafeSpend.toLocaleString('en-IN')}/day safe discretionary spend.
+        </Text>
+      </Animated.View>
+
+      {/* 4-Point Blueprint Bento Grid */}
+      <Animated.View entering={FadeInDown.delay(180).duration(300)} style={styles.bentoGrid}>
+        <View style={styles.bentoCard}>
+          <View style={[styles.bentoIconCircle, { backgroundColor: '#ECFDF5' }]}>
+            <Coins size={16} color="#059669" />
           </View>
+          <Text style={styles.bentoLabel}>DAILY SAFE SPEND</Text>
+          <Text style={styles.bentoVal}>
+            {currencySymbol}{dailySafeSpend.toLocaleString('en-IN')}{' '}
+            <Text style={{ fontSize: 11, fontWeight: '500' }}>/ day</Text>
+          </Text>
+          <Text style={styles.bentoSub}>Guaranteed goal safety</Text>
+        </View>
 
-          {/* Section 1: The Behavioral Diagnosis */}
-          <View style={styles.sectionBlock}>
-            <Text style={styles.sectionHeader}>Why This Happens (Psychology)</Text>
-            <Text style={styles.sectionParagraph}>{article.leakExplanation}</Text>
+        <View style={styles.bentoCard}>
+          <View style={[styles.bentoIconCircle, { backgroundColor: '#F3E8FF' }]}>
+            <Target size={16} color="#7C3AED" />
           </View>
+          <Text style={styles.bentoLabel}>PRIMARY GOAL</Text>
+          <Text style={styles.bentoVal} numberOfLines={1}>
+            {answers.primaryGoal || 'Save More Money'}
+          </Text>
+          <Text style={styles.bentoSub}>{answers.timeline || 'Within 6 Months'}</Text>
+        </View>
 
-          {/* Section 2: The Looop Habit Protocol */}
-          <View style={styles.sectionBlock}>
-            <Text style={styles.sectionHeader}>The Tiny Habit Protocol</Text>
-            <Text style={styles.sectionParagraph}>{article.habitSolution}</Text>
+        <View style={styles.bentoCard}>
+          <View style={[styles.bentoIconCircle, { backgroundColor: '#FEF3C7' }]}>
+            <Zap size={16} color="#D97706" />
           </View>
+          <Text style={styles.bentoLabel}>PRIMARY LEAK FOCUS</Text>
+          <Text style={styles.bentoVal} numberOfLines={1}>
+            {answers.overspendingCategory || 'Food & Dining'}
+          </Text>
+          <Text style={styles.bentoSub}>Mindful habit challenge</Text>
+        </View>
 
-          {/* 3 Value Pillars */}
-          <View style={styles.pillarRow}>
-            <View style={styles.pillarCard}>
-              <TrendingUp size={16} color="#059669" />
-              <Text style={styles.pillarVal}>+{currencySymbol}{data.leakEstimatedCost.toLocaleString('en-IN')}</Text>
-              <Text style={styles.pillarLabel}>Monthly Pool</Text>
-            </View>
-
-            <View style={styles.pillarCard}>
-              <Brain size={16} color="#7C3AED" />
-              <Text style={styles.pillarVal}>0 Guilt</Text>
-              <Text style={styles.pillarLabel}>Tiny Habits</Text>
-            </View>
-
-            <View style={styles.pillarCard}>
-              <Coins size={16} color="#0284C7" />
-              <Text style={styles.pillarVal}>Auto-Vault</Text>
-              <Text style={styles.pillarLabel}>Fund Dreams</Text>
-            </View>
+        <View style={styles.bentoCard}>
+          <View style={[styles.bentoIconCircle, { backgroundColor: '#E0F2FE' }]}>
+            <ShieldCheck size={16} color="#0284C7" />
           </View>
-        </Animated.View>
-      </ScrollView>
+          <Text style={styles.bentoLabel}>COACHING TONE</Text>
+          <Text style={styles.bentoVal} numberOfLines={1}>
+            {answers.coachingTone || 'Friendly Coach'}
+          </Text>
+          <Text style={styles.bentoSub}>Delivered {answers.insightFrequency || 'Weekly'}</Text>
+        </View>
+      </Animated.View>
 
-      {/* Action Button */}
-      <View style={styles.footer}>
+      {/* First Habit Challenge Card */}
+      <Animated.View entering={FadeInDown.delay(260).duration(300)} style={styles.habitCard}>
+        <View style={styles.habitHeaderRow}>
+          <View style={styles.habitBadge}>
+            <Zap size={12} color="#D97706" />
+            <Text style={styles.habitBadgeText}>FIRST 3-DAY HABIT CHALLENGE</Text>
+          </View>
+          <Text style={styles.habitDays}>DAY 1 OF 3</Text>
+        </View>
+
+        <Text style={styles.habitTitle}>
+          The 10-Second {answers.overspendingCategory || 'Spend'} Log
+        </Text>
+        <Text style={styles.habitDescription}>
+          Log every purchase in {answers.overspendingCategory || 'daily spends'} immediately via voice or keypad to eliminate unconscious habit loops.
+        </Text>
+
+        <View style={styles.habitCheckRow}>
+          <CheckCircle2 size={16} color="#059669" />
+          <Text style={styles.habitCheckText}>Automatically enrolled in your plan</Text>
+        </View>
+      </Animated.View>
+
+      {/* Bottom Primary CTA */}
+      <Animated.View entering={FadeInUp.delay(320).duration(300)} style={styles.bottomSection}>
         <TouchableOpacity
-          style={styles.actionBtn}
+          activeOpacity={0.85}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            onProceedToHabit();
+            onProceedToNext();
           }}
-          activeOpacity={0.85}
+          style={styles.primaryButton}
+          accessibilityRole="button"
+          accessibilityLabel="Start My Financial Plan"
         >
-          <Text style={styles.actionBtnText}>Try My First Tiny AI Task</Text>
-          <ArrowRight size={18} color="#FFFFFF" />
+          <Text style={styles.primaryButtonText}>Start My Financial Plan</Text>
+          <ArrowRight size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
-      </View>
-    </View>
+      </Animated.View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
     backgroundColor: '#FAF9F6',
-    justifyContent: 'space-between',
   },
-  loadingContainer: {
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 32,
+  },
+  loaderContainer: {
     flex: 1,
+    backgroundColor: '#FAF9F6',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#FAF9F6',
   },
-  aiGlowCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  loaderCenterBox: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  sparkleHeroRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#F3E8FF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#DDD6FE',
+    marginBottom: 16,
   },
-  loadingTitle: {
-    fontSize: 22,
+  percentText: {
+    fontSize: 44,
     fontWeight: '800',
     color: '#0F172A',
-    textAlign: 'center',
-    marginBottom: 8,
-    letterSpacing: -0.4,
+    letterSpacing: -1,
   },
-  loadingSubtitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 18,
-    maxWidth: 280,
+  loaderHeadline: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#475569',
+    marginTop: 6,
     marginBottom: 24,
   },
-  progressStepsList: {
+  calcProgressBg: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 16,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E2E8F0',
+    overflow: 'hidden',
+    marginBottom: 28,
+  },
+  calcProgressFill: {
+    height: '100%',
+    backgroundColor: '#7C3AED',
+    borderRadius: 4,
+  },
+  checklistContainer: {
+    width: '100%',
     gap: 12,
   },
-  progressStepItem: {
+  checklistItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  progressStepText: {
-    fontSize: 12,
-    fontWeight: '600',
+  checklistText: {
+    fontSize: 13,
+    fontWeight: '500',
     color: '#94A3B8',
-    flex: 1,
   },
-  progressStepTextActive: {
+  checklistTextActive: {
     color: '#0F172A',
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  scrollContent: {
-    paddingVertical: 12,
+  headerBox: {
+    marginBottom: 16,
   },
-  articleCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    padding: 20,
-    gap: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  articleHeaderRow: {
+  blueprintBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  articleTagBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F3E8FF',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 8,
+    backgroundColor: '#F3E8FF',
+    alignSelf: 'flex-start',
+    marginBottom: 10,
   },
-  articleTagText: {
+  blueprintBadgeText: {
     fontSize: 10,
     fontWeight: '800',
     color: '#7C3AED',
-    letterSpacing: 0.8,
-  },
-  articleReadTime: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#94A3B8',
-  },
-  articleTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-    lineHeight: 26,
-    letterSpacing: -0.4,
-  },
-  articleSubtitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
-    lineHeight: 18,
-  },
-  leakCalloutBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF2F2',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    padding: 14,
-    gap: 12,
-  },
-  leakCalloutIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  leakCalloutLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#DC2626',
     letterSpacing: 0.6,
   },
-  leakCalloutAmount: {
-    fontSize: 18,
+  mainTitle: {
+    fontSize: 26,
     fontWeight: '800',
-    color: '#991B1B',
+    lineHeight: 34,
+    letterSpacing: -0.6,
+    color: '#0F172A',
+    marginBottom: 6,
+  },
+  subTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 21,
+    color: '#475569',
+  },
+  heroMetricCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 18,
+    marginBottom: 14,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  heroMetricHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  heroMetricTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.6,
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+  },
+  trendBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  heroMetricValue: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.6,
+    marginVertical: 4,
+  },
+  heroMetricPeriod: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+  heroMetricDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#475569',
     marginTop: 2,
+  },
+  bentoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 14,
+  },
+  bentoCard: {
+    width: '48.5%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+  },
+  bentoIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  bentoLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
     marginBottom: 2,
   },
-  leakCalloutSub: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#7F1D1D',
-    lineHeight: 15,
-  },
-  sectionBlock: {
-    gap: 6,
-  },
-  sectionHeader: {
+  bentoVal: {
     fontSize: 14,
     fontWeight: '700',
     color: '#0F172A',
   },
-  sectionParagraph: {
-    fontSize: 13,
+  bentoSub: {
+    fontSize: 11,
     fontWeight: '500',
-    color: '#475569',
-    lineHeight: 19,
+    color: '#64748B',
+    marginTop: 2,
   },
-  pillarRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 6,
-  },
-  pillarCard: {
-    flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+  habitCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
-    padding: 12,
+    borderColor: '#E2E8F0',
+    padding: 16,
+    marginBottom: 20,
+  },
+  habitHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  habitBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 6,
+    paddingVertical: 2.5,
+    borderRadius: 6,
   },
-  pillarVal: {
-    fontSize: 13,
+  habitBadgeText: {
+    fontSize: 9,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#D97706',
+    letterSpacing: 0.5,
   },
-  pillarLabel: {
+  habitDays: {
     fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  habitTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  habitDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#475569',
+    marginBottom: 10,
+  },
+  habitCheckRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  habitCheckText: {
+    fontSize: 11,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#059669',
   },
-  footer: {
-    paddingVertical: 16,
+  bottomSection: {
+    paddingTop: 4,
   },
-  actionBtn: {
+  primaryButton: {
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#0F172A',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#7C3AED',
-    height: 54,
-    borderRadius: 16,
-    shadowColor: '#7C3AED',
+    paddingHorizontal: 20,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  actionBtnText: {
-    fontSize: 16,
+  primaryButtonText: {
+    fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',
+    letterSpacing: -0.2,
   },
 });

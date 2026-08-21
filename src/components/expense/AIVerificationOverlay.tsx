@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Sparkles, Check } from 'lucide-react-native';
+import { Sparkles, Check, Zap } from 'lucide-react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 import type { ParsedExpenseResult, CategoryItem } from '@/lib/expense-nlp-parser';
 
@@ -26,6 +26,8 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
   reason,
   currencySymbol = '₹',
 }) => {
+  const isAIParsed = Boolean(parsedNLPResult?.isAIParsed);
+
   return (
     <Animated.View
       entering={FadeIn.duration(280)}
@@ -33,13 +35,31 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
       style={[styles.verifyingContainer, { paddingTop: Math.max(insets.top, 24) }]}
     >
       <View style={styles.verifyingHeaderBox}>
-        <View style={styles.verifyingSparkleBadge}>
-          <Sparkles size={14} color="#9333EA" />
-          <Text style={styles.verifyingSparkleText}>SMART RECOGNITION</Text>
+        <View
+          style={[
+            styles.verifyingSparkleBadge,
+            !isAIParsed && { backgroundColor: '#FEF3C7' },
+          ]}
+        >
+          {isAIParsed ? (
+            <Sparkles size={14} color="#9333EA" />
+          ) : (
+            <Zap size={14} color="#D97706" />
+          )}
+          <Text
+            style={[
+              styles.verifyingSparkleText,
+              !isAIParsed && { color: '#D97706' },
+            ]}
+          >
+            {isAIParsed ? 'FIREBASE AI (GEMINI)' : 'LOCAL PATTERN PARSER'}
+          </Text>
         </View>
         <Text style={styles.verifyingTitle}>Analyzing Note Details</Text>
         <Text style={styles.verifyingSubtitle}>
-          Structuring your expense details automatically...
+          {isAIParsed
+            ? `Structured in real-time with ${parsedNLPResult?.aiModelUsed || 'Gemini 3.5 Flash-Lite'}`
+            : 'Structured with on-device pattern parser'}
         </Text>
       </View>
 

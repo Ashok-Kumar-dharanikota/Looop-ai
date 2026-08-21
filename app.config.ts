@@ -101,6 +101,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       eas: {
         projectId: '2929675f-fa56-4984-8e52-3a425e713acd',
       },
+      appVariant: APP_VARIANT,
+      previewDebugToken: '90C2C9E8-5F63-4A15-88E1-216179365622',
     },
     owner: 'ashdpauls-team',
   };

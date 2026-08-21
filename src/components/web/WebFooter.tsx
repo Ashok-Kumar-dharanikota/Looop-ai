@@ -6,6 +6,13 @@ import { PlayfulColors, PlayfulTypography } from '@/constants/playful-tokens';
 export const WebFooter: React.FC = () => {
   const router = useRouter();
 
+  const handleNavigate = (path: string) => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+    router.push(path as any);
+  };
+
   return (
     <footer style={footerWrapperStyle as any}>
       <div style={footerContainerStyle as any}>
@@ -35,19 +42,19 @@ export const WebFooter: React.FC = () => {
             <div style={linkColStyle as any}>
               <span style={linkHeaderStyle as any}>LEGAL</span>
               <span
-                onClick={() => router.push('/privacy-policy' as any)}
+                onClick={() => handleNavigate('/privacy-policy')}
                 style={{ ...linkItemStyle, cursor: 'pointer' } as any}
               >
                 Privacy Policy
               </span>
               <span
-                onClick={() => router.push('/terms-of-use' as any)}
+                onClick={() => handleNavigate('/terms-of-use')}
                 style={{ ...linkItemStyle, cursor: 'pointer' } as any}
               >
                 Terms of Use
               </span>
               <span
-                onClick={() => router.push('/paywall' as any)}
+                onClick={() => handleNavigate('/paywall')}
                 style={{ ...linkItemStyle, cursor: 'pointer' } as any}
               >
                 Pricing & Pro

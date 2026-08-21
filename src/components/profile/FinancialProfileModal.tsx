@@ -116,7 +116,7 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
       const loadedCustom: MustPaymentItem[] = [];
 
       // Populate predefined defaults
-      DEFAULT_MUST_PAYMENTS.forEach((p) => {
+      DEFAULT_MUST_PAYMENTS.forEach((p: MustPaymentItem) => {
         initialAmounts[p.id] = String(p.amount);
       });
 
@@ -141,14 +141,14 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
 
   const totalMustPayments = useMemo(() => {
     let sum = 0;
-    DEFAULT_MUST_PAYMENTS.forEach((item) => {
+    DEFAULT_MUST_PAYMENTS.forEach((item: MustPaymentItem) => {
       if (selectedMustPayments[item.id]) {
         const rawAmt = mustPaymentAmounts[item.id] || String(item.amount);
         const parsed = parseFloat(rawAmt.replace(/[^0-9.]/g, '')) || 0;
         sum += parsed;
       }
     });
-    customMustPayments.forEach((item) => {
+    customMustPayments.forEach((item: MustPaymentItem) => {
       if (selectedMustPayments[item.id]) {
         const rawAmt = mustPaymentAmounts[item.id] || String(item.amount);
         const parsed = parseFloat(rawAmt.replace(/[^0-9.]/g, '')) || 0;
@@ -236,7 +236,7 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
 
       // Gather active must payments list
       const activeMustPayments: MustPaymentItem[] = [];
-      DEFAULT_MUST_PAYMENTS.forEach((item) => {
+      DEFAULT_MUST_PAYMENTS.forEach((item: MustPaymentItem) => {
         if (selectedMustPayments[item.id]) {
           const rawAmt = mustPaymentAmounts[item.id] || String(item.amount);
           const parsed = parseFloat(rawAmt.replace(/[^0-9.]/g, '')) || item.amount;
@@ -246,7 +246,7 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
           });
         }
       });
-      customMustPayments.forEach((item) => {
+      customMustPayments.forEach((item: MustPaymentItem) => {
         if (selectedMustPayments[item.id]) {
           const rawAmt = mustPaymentAmounts[item.id] || String(item.amount);
           const parsed = parseFloat(rawAmt.replace(/[^0-9.]/g, '')) || item.amount;
@@ -368,7 +368,7 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
             </Text>
 
             <View style={styles.mustPaymentList}>
-              {DEFAULT_MUST_PAYMENTS.map((item) => {
+              {DEFAULT_MUST_PAYMENTS.map((item: MustPaymentItem) => {
                 const isSelected = Boolean(selectedMustPayments[item.id]);
                 const currAmtStr = mustPaymentAmounts[item.id] || String(item.amount);
 
