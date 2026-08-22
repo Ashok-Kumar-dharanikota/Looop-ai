@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { PlayfulColors, PlayfulTypography } from '@/constants/playful-tokens';
+import { Sparkles, ArrowRight } from 'lucide-react-native';
+import { WebColors, WebGradients, WebShadows, WebTypography } from '@/constants/web-tokens';
 
 interface WebHeaderProps {
   onCtaPress?: () => void;
@@ -21,58 +22,99 @@ export const WebHeader: React.FC<WebHeaderProps> = ({ onCtaPress }) => {
   };
 
   return (
-    <header style={webHeaderStyle as any}>
+    <header style={headerWrapperStyle as any}>
       <View style={styles.headerInner}>
-        {/* Logo Wordmark */}
+        {/* Brand Wordmark with Sunset Sparkle Badge */}
         <TouchableOpacity
-          activeOpacity={0.8}
+          activeOpacity={0.85}
           onPress={() => router.push('/' as any)}
-          style={styles.logoRow}
+          style={styles.brandRow}
         >
-          <View style={styles.logoIcon}>
-            <View style={styles.logoInnerCircle} />
+          <Text style={styles.logoText}>Looop</Text>
+          <View style={styles.sparkleBadge}>
+            <Sparkles size={13} color={WebColors.primaryOrange} />
           </View>
-          <Text style={styles.logoText}>looop</Text>
         </TouchableOpacity>
 
-        {/* Desktop Nav Links */}
+        {/* Desktop Navigation Links */}
         <View style={styles.navLinksRow}>
-          <TouchableOpacity onPress={() => handleNavClick('features')} style={styles.navItem}>
+          <TouchableOpacity
+            onPress={() => handleNavClick('features')}
+            style={styles.navItem}
+            activeOpacity={0.7}
+          >
             <Text style={styles.navText}>Features</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavClick('impact')} style={styles.navItem}>
+
+          <TouchableOpacity
+            onPress={() => handleNavClick('impact')}
+            style={styles.navItem}
+            activeOpacity={0.7}
+          >
             <Text style={styles.navText}>3D Impact</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavClick('essays')} style={styles.navItem}>
-            <Text style={styles.navText}>Stories</Text>
+
+          <TouchableOpacity
+            onPress={() => handleNavClick('stories')}
+            style={styles.navItem}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navText}>Habit Stories</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleNavClick('faq')} style={styles.navItem}>
+
+          <TouchableOpacity
+            onPress={() => handleNavClick('faq')}
+            style={styles.navItem}
+            activeOpacity={0.7}
+          >
             <Text style={styles.navText}>FAQ</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Right CTA */}
+        {/* Right Action: Sunset Gradient VIP Early Access Pill */}
         <View style={styles.headerRight}>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={onCtaPress || (() => handleNavClick('waitlist'))}
-            style={styles.pillCta}
+          <button
+            type="button"
+            onClick={onCtaPress || (() => handleNavClick('waitlist'))}
+            style={ctaButtonStyle as any}
           >
-            <Text style={styles.pillCtaText}>Get Early Access</Text>
-          </TouchableOpacity>
+            <span>Get Early Access</span>
+            <ArrowRight size={15} color="#FFFFFF" strokeWidth={2.4} />
+          </button>
         </View>
       </View>
     </header>
   );
 };
 
-const webHeaderStyle = {
+const headerWrapperStyle = {
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
+  backgroundColor: 'rgba(250, 249, 246, 0.92)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
   position: 'sticky',
   top: 0,
   zIndex: 100,
-  borderBottom: `1px solid ${PlayfulColors.warmMist}`,
+  borderBottom: `1px solid ${WebColors.borderHairline}`,
+  transition: 'background-color 0.2s ease',
+};
+
+const ctaButtonStyle = {
+  background: WebGradients.primarySunset,
+  color: '#FFFFFF',
+  padding: '10px 20px',
+  borderRadius: '999px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  border: 'none',
+  fontSize: '14.5px',
+  fontWeight: '700',
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.2px',
+  boxShadow: WebShadows.buttonPrimary,
+  cursor: 'pointer',
+  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
 };
 
 const styles = StyleSheet.create({
@@ -84,35 +126,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingVertical: 18,
+    paddingVertical: 16,
   },
-  logoRow: {
+  brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  logoIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: PlayfulColors.inkBlack,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoInnerCircle: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2.5,
-    borderColor: PlayfulColors.hotMagenta,
+    gap: 7,
   },
   logoText: {
     fontSize: 24,
+    fontFamily: 'Outfit_700Bold',
     fontWeight: '800',
-    fontStyle: 'italic',
-    color: PlayfulColors.hotMagenta,
-    fontFamily: PlayfulTypography.fontFamily,
-    letterSpacing: -0.5,
+    color: WebColors.inkSlate,
+    letterSpacing: -0.6,
+  },
+  sparkleBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: WebColors.creamSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: WebColors.creamBorder,
   },
   navLinksRow: {
     flexDirection: 'row',
@@ -125,29 +161,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   navText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: PlayfulColors.charcoal,
-    fontFamily: PlayfulTypography.fontFamily,
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: WebColors.subSlate,
+    fontFamily: 'Inter_600SemiBold',
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  pillCta: {
-    backgroundColor: PlayfulColors.hotMagenta,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 99,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillCtaText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
-    fontFamily: PlayfulTypography.fontFamily,
-    letterSpacing: -0.2,
   },
 });

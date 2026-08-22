@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { HeartPulse, Users, TrendingUp, Sparkles, Check } from 'lucide-react-native';
-import { PlayfulColors, PlayfulTypography, PlayfulShadows, PlayfulRadii } from '@/constants/playful-tokens';
+import { WebColors, WebShadows, WebTypography } from '@/constants/web-tokens';
 
 export const ImpactMatrixSection: React.FC = () => {
   return (
@@ -10,17 +9,19 @@ export const ImpactMatrixSection: React.FC = () => {
         {/* Section Header */}
         <div style={headerBlockStyle as any}>
           <div style={badgeStyle as any}>
-            <Sparkles size={12} color={PlayfulColors.hotMagenta} />
+            <Sparkles size={13} color={WebColors.primaryOrange} />
             <span style={badgeTextStyle as any}>THE 3D IMPACT MATRIX</span>
           </div>
+
           <h2 style={sectionHeadingStyle as any}>
             Money isn’t isolated numbers.<br />
-            <span style={{ color: PlayfulColors.charcoal, fontStyle: 'normal' }}>
+            <span style={{ color: WebColors.subSlate }}>
               It’s your sleep, relationships, and freedom.
             </span>
           </h2>
+
           <p style={sectionSubtextStyle as any}>
-            Most apps show cold bar charts. Looop maps every recurring expense against three pillars of human well-being so you make decisions from clarity, not guilt.
+            Most apps show cold bar charts that induce guilt. Looop maps every recurring expense against three pillars of human well-being so you make decisions from clarity.
           </p>
         </div>
 
@@ -28,25 +29,27 @@ export const ImpactMatrixSection: React.FC = () => {
         <div style={cardsGridStyle as any}>
           {/* Pillar 1: Health & Vitality */}
           <div style={pillarCardStyle as any}>
-            <div style={cardTopRowStyle as any}>
-              <div style={{ ...pillarIconBox, backgroundColor: 'rgba(255, 46, 149, 0.08)' } as any}>
-                <HeartPulse size={22} color={PlayfulColors.hotMagenta} strokeWidth={2.2} />
+            <div>
+              <div style={cardTopRowStyle as any}>
+                <div style={{ ...pillarIconBox, backgroundColor: WebColors.coralSoft }}>
+                  <HeartPulse size={20} color={WebColors.coral} strokeWidth={2.2} />
+                </div>
+                <span style={pillarTagStyle as any}>PILLAR 01</span>
               </div>
-              <span style={pillarTagStyle as any}>PILLAR 01</span>
-            </div>
 
-            <h3 style={pillarTitleStyle as any}>Health & Vitality</h3>
-            <p style={pillarDescriptionStyle as any}>
-              Heavy late-night deliveries and rushed sedentary cab rides spike night heart rates by 8–12 bpm and fragment restorative REM sleep.
-            </p>
+              <h3 style={pillarTitleStyle as any}>Health & Vitality</h3>
+              <p style={pillarDescriptionStyle as any}>
+                Heavy late-night deliveries and rushed sedentary cab rides spike resting heart rates by 8–12 bpm and fragment restorative REM sleep.
+              </p>
+            </div>
 
             <div style={takeawayBoxStyle as any}>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>Ditch late deliveries ➔ Reclaim 28% deep sleep</span>
               </div>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>Metro commute ➔ 3,000 incidental daily steps</span>
               </div>
             </div>
@@ -54,25 +57,27 @@ export const ImpactMatrixSection: React.FC = () => {
 
           {/* Pillar 2: Family & Shared Memories */}
           <div style={pillarCardStyle as any}>
-            <div style={cardTopRowStyle as any}>
-              <div style={{ ...pillarIconBox, backgroundColor: 'rgba(17, 17, 17, 0.06)' } as any}>
-                <Users size={22} color={PlayfulColors.inkBlack} strokeWidth={2.2} />
+            <div>
+              <div style={cardTopRowStyle as any}>
+                <div style={{ ...pillarIconBox, backgroundColor: WebColors.azureSoft }}>
+                  <Users size={20} color={WebColors.azure} strokeWidth={2.2} />
+                </div>
+                <span style={pillarTagStyle as any}>PILLAR 02</span>
               </div>
-              <span style={pillarTagStyle as any}>PILLAR 02</span>
-            </div>
 
-            <h3 style={pillarTitleStyle as any}>Family & Memories</h3>
-            <p style={pillarDescriptionStyle as any}>
-              Discretionary micro-leaks like unmonitored OTT subs and daily convenience cabs quietly siphon ₹3,200 to ₹6,800 every single month.
-            </p>
+              <h3 style={pillarTitleStyle as any}>Family & Memories</h3>
+              <p style={pillarDescriptionStyle as any}>
+                Discretionary micro-leaks like unmonitored OTT subs and surge cabs quietly siphon ₹3,200 to ₹6,800 every single month.
+              </p>
+            </div>
 
             <div style={takeawayBoxStyle as any}>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>Redirect ₹3,200/mo ➔ 2 full weekend family trips/yr</span>
               </div>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>More evening presence by avoiding traffic gridlock</span>
               </div>
             </div>
@@ -80,25 +85,27 @@ export const ImpactMatrixSection: React.FC = () => {
 
           {/* Pillar 3: Financial Freedom & Vaults */}
           <div style={pillarCardStyle as any}>
-            <div style={cardTopRowStyle as any}>
-              <div style={{ ...pillarIconBox, backgroundColor: 'rgba(255, 46, 149, 0.08)' } as any}>
-                <TrendingUp size={22} color={PlayfulColors.hotMagenta} strokeWidth={2.2} />
+            <div>
+              <div style={cardTopRowStyle as any}>
+                <div style={{ ...pillarIconBox, backgroundColor: WebColors.creamSoft }}>
+                  <TrendingUp size={20} color={WebColors.primaryOrange} strokeWidth={2.2} />
+                </div>
+                <span style={pillarTagStyle as any}>PILLAR 03</span>
               </div>
-              <span style={pillarTagStyle as any}>PILLAR 03</span>
-            </div>
 
-            <h3 style={pillarTitleStyle as any}>Milestone Vaults</h3>
-            <p style={pillarDescriptionStyle as any}>
-              Saved money isn’t left sitting as abstract numbers. It automatically loops directly into your prioritized, locked dream vaults.
-            </p>
+              <h3 style={pillarTitleStyle as any}>Milestone Vaults</h3>
+              <p style={pillarDescriptionStyle as any}>
+                Saved money isn’t left sitting as abstract numbers. It automatically loops directly into your prioritized, locked dream targets.
+              </p>
+            </div>
 
             <div style={takeawayBoxStyle as any}>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>Reach your Smart Ring vault 3 weeks early</span>
               </div>
               <div style={takeawayRowStyle as any}>
-                <Check size={14} color={PlayfulColors.hotMagenta} strokeWidth={2.5} />
+                <Check size={14} color={WebColors.accentOrange} strokeWidth={2.6} />
                 <span style={takeawayTextStyle as any}>Zero guilt purchases paid 100% in full</span>
               </div>
             </div>
@@ -111,55 +118,57 @@ export const ImpactMatrixSection: React.FC = () => {
 
 const sectionWrapperStyle = {
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
-  padding: '113px 0',
+  backgroundColor: WebColors.canvas,
+  padding: '96px 0',
+  display: 'flex',
+  justifyContent: 'center',
 };
 
 const sectionContainerStyle = {
-  maxWidth: 1200,
-  margin: '0 auto',
+  maxWidth: '1200px',
+  width: '100%',
   padding: '0 24px',
 };
 
 const headerBlockStyle = {
   maxWidth: '720px',
-  marginBottom: '64px',
+  marginBottom: '56px',
 };
 
 const badgeStyle = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '8px',
-  backgroundColor: 'rgba(255, 46, 149, 0.08)',
+  gap: '7px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
   padding: '6px 14px',
-  borderRadius: '99px',
+  borderRadius: '999px',
   marginBottom: '18px',
 };
 
 const badgeTextStyle = {
   fontSize: '11px',
-  fontWeight: '700',
-  letterSpacing: '1px',
-  color: PlayfulColors.hotMagenta,
-  fontFamily: PlayfulTypography.fontFamily,
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
 };
 
 const sectionHeadingStyle = {
-  fontSize: '38px',
+  fontSize: 'clamp(32px, 4.5vw, 44px)',
   lineHeight: 1.15,
   fontWeight: 800,
-  fontStyle: 'italic',
-  color: PlayfulColors.inkBlack,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
   margin: '0 0 16px 0',
-  letterSpacing: '-0.5px',
+  letterSpacing: '-0.03em',
 };
 
 const sectionSubtextStyle = {
   fontSize: '16px',
   lineHeight: 1.6,
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
   margin: 0,
 };
 
@@ -170,27 +179,28 @@ const cardsGridStyle = {
 };
 
 const pillarCardStyle = {
-  backgroundColor: PlayfulColors.paperWhite,
-  borderRadius: `${PlayfulRadii.cards}px`,
-  padding: '36px 30px',
-  boxShadow: PlayfulShadows.cardStack,
-  border: `1px solid ${PlayfulColors.warmMist}`,
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '24px',
+  padding: '32px 28px',
+  boxShadow: WebShadows.cardRest,
+  border: `1.2px solid ${WebColors.borderCard}`,
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
+  minHeight: '340px',
 };
 
 const cardTopRowStyle = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginBottom: '20px',
+  marginBottom: '18px',
 };
 
 const pillarIconBox = {
-  width: '48px',
-  height: '48px',
-  borderRadius: '16px',
+  width: '42px',
+  height: '42px',
+  borderRadius: '14px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -198,36 +208,37 @@ const pillarIconBox = {
 
 const pillarTagStyle = {
   fontSize: '11px',
-  fontWeight: '700',
+  fontWeight: '800',
   letterSpacing: '1px',
-  color: PlayfulColors.stone,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.displayFont,
 };
 
 const pillarTitleStyle = {
-  fontSize: '22px',
-  fontWeight: '700',
-  fontStyle: 'italic',
-  color: PlayfulColors.inkBlack,
-  fontFamily: PlayfulTypography.fontFamily,
-  margin: '0 0 12px 0',
+  fontSize: '20px',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.2px',
+  margin: '0 0 10px 0',
 };
 
 const pillarDescriptionStyle = {
   fontSize: '14px',
   lineHeight: 1.6,
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
   margin: '0 0 24px 0',
 };
 
 const takeawayBoxStyle = {
-  backgroundColor: PlayfulColors.oatCanvas,
-  borderRadius: '20px',
+  backgroundColor: WebColors.surfaceSubtle,
+  borderRadius: '16px',
   padding: '16px',
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
+  border: `1px solid ${WebColors.borderHairline}`,
 };
 
 const takeawayRowStyle = {
@@ -237,8 +248,8 @@ const takeawayRowStyle = {
 };
 
 const takeawayTextStyle = {
-  fontSize: '13px',
-  fontWeight: '500',
-  color: PlayfulColors.softInk,
-  fontFamily: PlayfulTypography.fontFamily,
+  fontSize: '12.5px',
+  fontWeight: '600',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.bodyFont,
 };

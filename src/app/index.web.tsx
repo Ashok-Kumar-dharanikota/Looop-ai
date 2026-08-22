@@ -1,16 +1,13 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
 import { WebHeader } from '@/components/web/WebHeader';
 import { LandingHero } from '@/components/web/LandingHero';
-import { TiltedAppTiles } from '@/components/web/TiltedAppTiles';
-import { MobileMockupShowcase } from '@/components/web/MobileMockupShowcase';
 import { CategoryNavBand } from '@/components/web/CategoryNavBand';
+import { FeatureBentoGrid } from '@/components/web/FeatureBentoGrid';
 import { ImpactMatrixSection } from '@/components/web/ImpactMatrixSection';
-import { GradientHighlightSection } from '@/components/web/GradientHighlightSection';
 import { FaqSection } from '@/components/web/FaqSection';
 import { FinalCtaSection } from '@/components/web/FinalCtaSection';
 import { WebFooter } from '@/components/web/WebFooter';
-import { PlayfulColors } from '@/constants/playful-tokens';
+import { WebColors } from '@/constants/web-tokens';
 
 export default function WebLandingPage() {
   const handleJoinWaitlist = (email: string) => {
@@ -19,34 +16,28 @@ export default function WebLandingPage() {
 
   return (
     <div style={pageContainerStyle as any}>
-      {/* Sticky Top Header */}
+      {/* Sticky Top Navigation Header */}
       <WebHeader />
 
-      {/* Main Hero Section */}
+      {/* Hero Stage with Dual-Column Value Prop + Floating Phone Mockup */}
       <LandingHero onJoinWaitlist={handleJoinWaitlist} />
 
-      {/* Interactive Mobile Device Mockups Showcase */}
-      <MobileMockupShowcase />
-
-      {/* Hand of Cards Fan Showcase */}
-      <TiltedAppTiles />
-
-      {/* Full-width Black Category Nav Ticker Band */}
+      {/* Hardware-accelerated Capability Ticker */}
       <CategoryNavBand />
 
-      {/* 3D Impact Matrix Pillars */}
+      {/* High-Density Interactive Feature Bento Grid */}
+      <FeatureBentoGrid />
+
+      {/* 3D Impact Matrix: Health, Family & Freedom */}
       <ImpactMatrixSection />
 
-      {/* Mid-page Atmospheric Gradient Highlight */}
-      <GradientHighlightSection />
-
-      {/* Two-Column FAQ Section */}
+      {/* Interactive FAQ Accordion */}
       <FaqSection />
 
-      {/* Final Closing Call to Action */}
+      {/* Final Closing VIP Waitlist Card */}
       <FinalCtaSection onJoinWaitlist={handleJoinWaitlist} />
 
-      {/* Footer with Legal Links */}
+      {/* Footer with Legal & Privacy Links */}
       <WebFooter />
     </div>
   );
@@ -55,7 +46,7 @@ export default function WebLandingPage() {
 const pageContainerStyle = {
   minHeight: '100vh',
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
+  backgroundColor: WebColors.canvas,
   display: 'flex',
   flexDirection: 'column',
   overflowX: 'hidden',

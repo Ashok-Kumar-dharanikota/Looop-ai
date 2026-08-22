@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { PlayfulColors, PlayfulTypography } from '@/constants/playful-tokens';
+import { Sparkles, ShieldCheck } from 'lucide-react-native';
+import { WebColors, WebTypography } from '@/constants/web-tokens';
 
 export const WebFooter: React.FC = () => {
   const router = useRouter();
@@ -13,51 +13,63 @@ export const WebFooter: React.FC = () => {
     router.push(path as any);
   };
 
+  const handleNavClick = (anchorId: string) => {
+    if (typeof window !== 'undefined') {
+      const el = document.getElementById(anchorId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+  };
+
   return (
     <footer style={footerWrapperStyle as any}>
       <div style={footerContainerStyle as any}>
         {/* Top Row: Wordmark & Navigation */}
         <div style={footerTopRowStyle as any}>
+          {/* Brand Column */}
           <div style={brandColStyle as any}>
-            <div style={logoRowStyle as any}>
-              <div style={logoIconStyle as any}>
-                <div style={logoInnerDotStyle as any} />
+            <div style={brandRowStyle as any}>
+              <span style={logoTextStyle as any}>Looop</span>
+              <div style={sparkleBadgeStyle as any}>
+                <Sparkles size={13} color={WebColors.primaryOrange} />
               </div>
-              <span style={logoTextStyle as any}>looop</span>
             </div>
             <p style={taglineStyle as any}>
-              The AI Financial Biographer that helps you spend smarter and fund your dreams.
+              A private, local-first personal finance companion that transforms daily cashflow into lasting wealth and mindful habits.
             </p>
           </div>
 
+          {/* Navigation Links Columns */}
           <div style={linksGroupStyle as any}>
             <div style={linkColStyle as any}>
               <span style={linkHeaderStyle as any}>PRODUCT</span>
-              <a href="#features" style={linkItemStyle as any}>Features</a>
-              <a href="#impact" style={linkItemStyle as any}>3D Impact</a>
-              <a href="#essays" style={linkItemStyle as any}>Stories</a>
-              <a href="#faq" style={linkItemStyle as any}>FAQ</a>
+              <span onClick={() => handleNavClick('features')} style={linkItemStyle as any}>Features</span>
+              <span onClick={() => handleNavClick('impact')} style={linkItemStyle as any}>3D Impact</span>
+              <span onClick={() => handleNavClick('features')} style={linkItemStyle as any}>Habit Stories</span>
+              <span onClick={() => handleNavClick('faq')} style={linkItemStyle as any}>FAQ</span>
             </div>
 
             <div style={linkColStyle as any}>
-              <span style={linkHeaderStyle as any}>LEGAL</span>
+              <span style={linkHeaderStyle as any}>LEGAL & SECURITY</span>
               <span
                 onClick={() => handleNavigate('/privacy-policy')}
-                style={{ ...linkItemStyle, cursor: 'pointer' } as any}
+                style={linkItemStyle as any}
               >
                 Privacy Policy
               </span>
               <span
                 onClick={() => handleNavigate('/terms-of-use')}
-                style={{ ...linkItemStyle, cursor: 'pointer' } as any}
+                style={linkItemStyle as any}
               >
                 Terms of Use
               </span>
               <span
                 onClick={() => handleNavigate('/paywall')}
-                style={{ ...linkItemStyle, cursor: 'pointer' } as any}
+                style={linkItemStyle as any}
               >
-                Pricing & Pro
+                Pro Membership
               </span>
             </div>
           </div>
@@ -69,10 +81,11 @@ export const WebFooter: React.FC = () => {
         {/* Bottom Row */}
         <div style={footerBottomRowStyle as any}>
           <span style={copyrightTextStyle as any}>
-            © {new Date().getFullYear()} Looop Inc. All rights reserved. Encrypted local-first storage.
+            © {new Date().getFullYear()} Looop. All rights reserved. 100% Encrypted on-device storage.
           </span>
-          <div style={socialRowStyle as any}>
-            <span style={copyrightTextStyle as any}>Crafted with warm paper aesthetics.</span>
+          <div style={securityBadgeRowStyle as any}>
+            <ShieldCheck size={14} color={WebColors.emerald} />
+            <span style={securityBadgeTextStyle as any}>Zero Bank Scraping • Biometric Protected</span>
           </div>
         </div>
       </div>
@@ -82,13 +95,13 @@ export const WebFooter: React.FC = () => {
 
 const footerWrapperStyle = {
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
-  borderTop: `1px solid ${PlayfulColors.warmMist}`,
+  backgroundColor: WebColors.canvas,
+  borderTop: `1px solid ${WebColors.borderCard}`,
   padding: '64px 0 40px 0',
 };
 
 const footerContainerStyle = {
-  maxWidth: 1200,
+  maxWidth: '1200px',
   margin: '0 auto',
   padding: '0 24px',
 };
@@ -102,53 +115,47 @@ const footerTopRowStyle = {
 };
 
 const brandColStyle = {
-  maxWidth: '360px',
+  maxWidth: '380px',
 };
 
-const logoRowStyle = {
+const brandRowStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
+  gap: '8px',
   marginBottom: '14px',
 };
 
-const logoIconStyle = {
-  width: '28px',
-  height: '28px',
-  borderRadius: '8px',
-  backgroundColor: PlayfulColors.inkBlack,
+const logoTextStyle = {
+  fontSize: '24px',
+  fontFamily: 'Outfit_700Bold',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  letterSpacing: '-0.6px',
+};
+
+const sparkleBadgeStyle = {
+  width: '24px',
+  height: '24px',
+  borderRadius: '12px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 };
 
-const logoInnerDotStyle = {
-  width: '12px',
-  height: '12px',
-  borderRadius: '6px',
-  border: `2.5px solid ${PlayfulColors.hotMagenta}`,
-};
-
-const logoTextStyle = {
-  fontSize: '24px',
-  fontWeight: 800,
-  fontStyle: 'italic',
-  color: PlayfulColors.hotMagenta,
-  fontFamily: PlayfulTypography.fontFamily,
-  letterSpacing: '-0.5px',
-};
-
 const taglineStyle = {
   fontSize: '14px',
   lineHeight: 1.6,
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
   margin: 0,
 };
 
 const linksGroupStyle = {
   display: 'flex',
   gap: '64px',
+  flexWrap: 'wrap',
 };
 
 const linkColStyle = {
@@ -159,24 +166,24 @@ const linkColStyle = {
 
 const linkHeaderStyle = {
   fontSize: '11px',
-  fontWeight: 700,
+  fontWeight: '800',
   letterSpacing: '1px',
-  color: PlayfulColors.charcoal,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
   marginBottom: '4px',
 };
 
 const linkItemStyle = {
   fontSize: '14px',
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
-  textDecoration: 'none',
-  transition: 'color 0.2s ease',
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
+  cursor: 'pointer',
+  transition: 'color 0.15s ease',
 };
 
 const dividerStyle = {
   height: '1px',
-  backgroundColor: PlayfulColors.warmMist,
+  backgroundColor: WebColors.borderCard,
   width: '100%',
   marginBottom: '28px',
 };
@@ -191,12 +198,19 @@ const footerBottomRowStyle = {
 
 const copyrightTextStyle = {
   fontSize: '13px',
-  color: PlayfulColors.stone,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.bodyFont,
 };
 
-const socialRowStyle = {
+const securityBadgeRowStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '16px',
+  gap: '6px',
+};
+
+const securityBadgeTextStyle = {
+  fontSize: '12.5px',
+  fontWeight: '600',
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
 };

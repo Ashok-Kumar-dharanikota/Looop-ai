@@ -1,25 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { PlayfulColors, PlayfulTypography } from '@/constants/playful-tokens';
+import { WebColors, WebTypography } from '@/constants/web-tokens';
 
 const TICKER_ITEMS = [
-  'HABIT LOOP PSYCHOLOGY',
+  '1-SECOND VOICE LOGGING',
   '•',
-  '3D IMPACT MATRIX',
+  'LOCAL-FIRST ON-DEVICE SQLITE',
   '•',
-  '2-SECOND VOICE LOGGING',
+  'AI HABIT BIOGRAPHER',
   '•',
-  'MEDIUM-STYLE ESSAYS',
+  'ZERO BANK LOGINS REQUIRED',
   '•',
   'MILESTONE SAVINGS VAULTS',
   '•',
   'HEALTH & SLEEP RECOVERY',
   '•',
-  'LOCAL-FIRST PRIVACY',
+  'SAFE DAILY SPEND PACING',
   '•',
-  'ZERO GUILT BUDGETING',
+  'BIOMETRIC FACE ID SECURITY',
   '•',
-  'REAL-TIME RUN RATE',
+  '100% PRIVATE & OFFLINE-READY',
 ];
 
 export const CategoryNavBand: React.FC = () => {
@@ -32,7 +31,7 @@ export const CategoryNavBand: React.FC = () => {
               key={index}
               style={{
                 ...tickerItemStyle,
-                color: item === '•' ? PlayfulColors.hotMagenta : '#FFFFFF',
+                color: item === '•' ? WebColors.primaryOrange : '#FFFFFF',
               } as any}
             >
               {item}
@@ -46,11 +45,13 @@ export const CategoryNavBand: React.FC = () => {
 
 const navBandWrapperStyle = {
   width: '100%',
-  backgroundColor: PlayfulColors.inkBlack,
+  backgroundColor: WebColors.inkSlate,
   padding: '16px 0',
   overflow: 'hidden',
   display: 'flex',
   alignItems: 'center',
+  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
 };
 
 const marqueeContainerStyle = {
@@ -63,12 +64,12 @@ const marqueeContainerStyle = {
 const tickerContentStyle = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '28px',
+  gap: '32px',
 };
 
 const tickerItemStyle = {
-  fontSize: '13px',
-  fontWeight: '600',
+  fontSize: '12.5px',
+  fontWeight: '700',
   letterSpacing: '1.2px',
-  fontFamily: PlayfulTypography.fontFamily,
+  fontFamily: WebTypography.displayFont,
 };

@@ -24,6 +24,18 @@ export default function WebRootLayout() {
   useEffect(() => {
     // Inject global web styles for full window scrolling and typography smoothing
     if (typeof document !== 'undefined') {
+      // 1. Inject Google Fonts link if not present
+      const fontLinkId = 'looop-google-fonts';
+      if (!document.getElementById(fontLinkId)) {
+        const link = document.createElement('link');
+        link.id = fontLinkId;
+        link.rel = 'stylesheet';
+        link.href =
+          'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap';
+        document.head.appendChild(link);
+      }
+
+      // 2. Inject global CSS rules
       const styleId = 'looop-web-global-styles';
       let style = document.getElementById(styleId) as HTMLStyleElement;
       if (!style) {
@@ -41,15 +53,15 @@ export default function WebRootLayout() {
           scroll-behavior: smooth;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          background-color: #f6f2ee;
+          background-color: #FAF9F6;
           height: auto !important;
           min-height: 100%;
           overflow-y: auto !important;
           overflow-x: hidden;
         }
         body {
-          background-color: #f6f2ee;
-          color: #000000;
+          background-color: #FAF9F6;
+          color: #0F172A;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           min-height: 100vh;
           height: auto !important;
@@ -64,18 +76,74 @@ export default function WebRootLayout() {
           overflow-y: visible !important;
         }
         ::selection {
-          background-color: #ff2e95;
-          color: #ffffff;
+          background-color: #FFEDD5;
+          color: #EA580C;
         }
         button {
           cursor: pointer;
           border: none;
           outline: none;
+          font-family: inherit;
         }
         a {
           text-decoration: none;
           color: inherit;
         }
+        input::placeholder {
+          color: #94A3B8;
+        }
+
+        /* Hardware-accelerated Keyframe Animations */
+        @keyframes floatSmooth {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+        @keyframes tickerMarquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        @keyframes pulseGlow {
+          0%, 100% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.05);
+          }
+        }
+        @keyframes waveScale {
+          0%, 100% {
+            transform: scaleY(0.4);
+          }
+          50% {
+            transform: scaleY(1);
+          }
+        }
+
+        .animate-float-mockup {
+          animation: floatSmooth 6s ease-in-out infinite;
+        }
+        .animate-ticker {
+          display: inline-flex;
+          animation: tickerMarquee 28s linear infinite;
+        }
+        .animate-ticker:hover {
+          animation-play-state: paused;
+        }
+        .wave-anim-1 { animation: waveScale 1.1s ease-in-out infinite 0.1s; }
+        .wave-anim-2 { animation: waveScale 1.1s ease-in-out infinite 0.3s; }
+        .wave-anim-3 { animation: waveScale 1.1s ease-in-out infinite 0.5s; }
+        .wave-anim-4 { animation: waveScale 1.1s ease-in-out infinite 0.2s; }
+        .wave-anim-5 { animation: waveScale 1.1s ease-in-out infinite 0.4s; }
       `;
     }
   }, []);
@@ -86,4 +154,5 @@ export default function WebRootLayout() {
     </QueryClientProvider>
   );
 }
+
 

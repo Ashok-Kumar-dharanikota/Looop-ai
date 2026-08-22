@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react-native';
-import { PlayfulColors, PlayfulTypography, PlayfulShadows } from '@/constants/playful-tokens';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import {
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  Lock,
+  Mic,
+  Car,
+  Coffee,
+  Utensils,
+  TrendingUp,
+  ShieldCheck,
+} from 'lucide-react-native';
+import { WebColors, WebGradients, WebShadows, WebTypography } from '@/constants/web-tokens';
 
 interface LandingHeroProps {
   onJoinWaitlist?: (email: string) => void;
@@ -10,225 +21,690 @@ interface LandingHeroProps {
 export const LandingHero: React.FC<LandingHeroProps> = ({ onJoinWaitlist }) => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e?: any) => {
-    if (e && e.preventDefault) e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!email || !email.includes('@')) return;
-    setIsSubmitted(true);
-    if (onJoinWaitlist) onJoinWaitlist(email);
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      if (onJoinWaitlist) onJoinWaitlist(email);
+    }, 400);
   };
 
   return (
     <section style={heroSectionStyle as any} id="waitlist">
-      <View style={styles.heroContainer}>
-        {/* Editorial Subhead / Kicker Tag */}
-        <View style={styles.kickerBadge}>
-          <Sparkles size={13} color={PlayfulColors.hotMagenta} />
-          <Text style={styles.kickerText}>AI FINANCIAL BIOGRAPHER</Text>
-        </View>
+      {/* Background Ambient Radial Sunset Glow */}
+      <div style={ambientGlowStyle as any} />
 
-        {/* Display Headline - Heavy Italic Editorial Poster Energy */}
-        <h1 style={displayHeadlineStyle as any}>
-          Track less.<br />
-          <span style={{ color: PlayfulColors.inkBlack }}>Understand more.</span>
-        </h1>
+      <div style={heroContainerStyle as any}>
+        {/* Left Column: Value Proposition & VIP Waitlist Form */}
+        <div style={leftColStyle as any}>
+          {/* Kicker Badge */}
+          <div style={kickerBadgeStyle as any}>
+            <Sparkles size={13} color={WebColors.primaryOrange} />
+            <span style={kickerTextStyle as any}>AI FINANCIAL BIOGRAPHER & PRIVATE VAULT</span>
+          </div>
 
-        {/* Supporting Hero Subtext */}
-        <Text style={styles.heroSubtext}>
-          Your finances aren't a math problem — they're an emotional story. Looop diagnoses the habit loops behind your spending and turns daily micro-wins into funded dream vaults.
-        </Text>
+          {/* Display Headline */}
+          <h1 style={displayHeadlineStyle as any}>
+            Master daily cashflow.<br />
+            <span style={{ color: WebColors.primaryOrange }}>Fund life milestones.</span>
+          </h1>
 
-        {/* Unified Email Input + Pill CTA Composite */}
-        <View style={styles.compositeWrapper}>
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} style={compositeFormStyle as any}>
-              <View style={styles.inputCardPill}>
-                <TextInput
-                  style={styles.emailInput}
-                  placeholder="Enter your email for early access..."
-                  placeholderTextColor={PlayfulColors.stone}
+          {/* Supporting Copy */}
+          <p style={heroSubtextStyle as any}>
+            Your finances aren't an intimidating math spreadsheet — they're a behavioral story. Looop diagnoses the habit loops behind your daily spending and turns micro-wins into fully funded dream vaults.
+          </p>
+
+          {/* Waitlist Form Pill */}
+          <div style={formWrapperStyle as any}>
+            {!isSubmitted ? (
+              <form onSubmit={handleSubmit} style={formCardStyle as any}>
+                <input
+                  type="email"
+                  placeholder="Enter your email for VIP early access..."
                   value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={emailInputStyle as any}
+                  required
                 />
                 <button
                   type="submit"
-                  style={primaryButtonStyle as any}
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
+                  disabled={isSubmitting}
+                  style={submitBtnStyle as any}
                 >
-                  <span style={primaryButtonTextStyle as any}>Claim Early Access</span>
-                  <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                  <span>{isSubmitting ? 'Joining...' : 'Claim VIP Access'}</span>
+                  <ArrowRight size={16} color="#FFFFFF" strokeWidth={2.4} />
                 </button>
-              </View>
-            </form>
-          ) : (
-            <View style={styles.successPill}>
-              <CheckCircle2 size={20} color={PlayfulColors.hotMagenta} />
-              <Text style={styles.successText}>
-                You're on the VIP list! Watch your inbox for beta invites.
-              </Text>
-            </View>
-          )}
+              </form>
+            ) : (
+              <div style={successBoxStyle as any}>
+                <CheckCircle2 size={20} color={WebColors.emerald} />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={successTitleStyle as any}>You're on the VIP list!</span>
+                  <span style={successSubStyle as any}>Watch your inbox for priority access & beta invites.</span>
+                </div>
+              </div>
+            )}
 
-          <Text style={styles.helperText}>
-            Zero spam. Private & local-first on iOS, Android & Web.
-          </Text>
-        </View>
-      </View>
+            {/* Privacy & Trust Badge */}
+            <div style={trustRowStyle as any}>
+              <div style={trustItemStyle as any}>
+                <Lock size={13} color={WebColors.emerald} />
+                <span style={trustTextStyle as any}>100% Local-First SQLite</span>
+              </div>
+              <span style={{ color: WebColors.borderStrong }}>•</span>
+              <div style={trustItemStyle as any}>
+                <ShieldCheck size={13} color={WebColors.accentOrange} />
+                <span style={trustTextStyle as any}>Zero Bank Logins Required</span>
+              </div>
+              <span style={{ color: WebColors.borderStrong }}>•</span>
+              <div style={trustItemStyle as any}>
+                <Sparkles size={13} color={WebColors.primaryOrange} />
+                <span style={trustTextStyle as any}>iOS, Android & Web</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: High-Fidelity Floating Device Mockup */}
+        <div style={rightColStyle as any}>
+          <div className="animate-float-mockup" style={phoneMockupCardStyle as any}>
+            {/* Dynamic Island Header */}
+            <div style={phoneHeaderRowStyle as any}>
+              <span style={timeTextStyle as any}>9:41</span>
+              <div style={dynamicIslandNotchStyle as any} />
+              <div style={statusIconsRowStyle as any}>
+                <span style={{ fontSize: '10.5px', fontWeight: '700', color: WebColors.inkSlate }}>5G</span>
+                <div style={batteryIconStyle as any}>
+                  <div style={batteryLevelStyle as any} />
+                </div>
+              </div>
+            </div>
+
+            {/* Phone Screen App Header */}
+            <div style={appUserRowStyle as any}>
+              <div>
+                <span style={appGreetingStyle as any}>Good Morning Alex ☀️</span>
+                <h3 style={appTitleStyle as any}>Total Savings Growth</h3>
+              </div>
+              <div style={avatarCircleStyle as any}>
+                <span>AK</span>
+              </div>
+            </div>
+
+            {/* Savings Growth Hero Card */}
+            <div style={savingsCardStyle as any}>
+              <div style={savingsCardHeaderStyle as any}>
+                <div>
+                  <div style={growthBadgePillStyle as any}>
+                    <TrendingUp size={11} color={WebColors.accentOrange} />
+                    <span style={growthBadgeTextStyle as any}>SAVINGS MOMENTUM</span>
+                  </div>
+                  <div style={amountHeroTextStyle as any}>₹84,500</div>
+                </div>
+                <div style={percentageTagStyle as any}>
+                  <span style={percentageNumberStyle as any}>+18.4%</span>
+                  <span style={percentageSubStyle as any}>THIS MONTH</span>
+                </div>
+              </div>
+
+              {/* Smooth Area Chart Curve */}
+              <div style={chartWrapperStyle as any}>
+                <svg width="100%" height="70" viewBox="0 0 280 70" fill="none" style={{ overflow: 'visible' }}>
+                  <defs>
+                    <linearGradient id="heroAreaGrad" x1="0" y1="0" x2="0" y2="70" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#FF6B00" stopOpacity="0.22" />
+                      <stop offset="0.6" stopColor="#FF6B00" stopOpacity="0.06" />
+                      <stop offset="1" stopColor="#FF6B00" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M 0,62 C 40,58 70,44 110,40 C 150,36 190,26 230,14 C 255,8 270,6 280,4 L 280,70 L 0,70 Z"
+                    fill="url(#heroAreaGrad)"
+                  />
+                  <path
+                    d="M 0,62 C 40,58 70,44 110,40 C 150,36 190,26 230,14 C 255,8 270,6 280,4"
+                    stroke="#FF6B00"
+                    strokeWidth="3.2"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="280" cy="4" r="5" fill="#FF6B00" />
+                  <circle cx="280" cy="4" r="9" fill="rgba(255, 107, 0, 0.25)" />
+                </svg>
+              </div>
+
+              {/* Safe Spend Pacing Badge */}
+              <div style={safePaceBoxStyle as any}>
+                <div style={safePaceDotStyle as any} />
+                <span style={safePaceTextStyle as any}>Safe to spend: <strong>₹1,240/day</strong> (16 days left)</span>
+              </div>
+            </div>
+
+            {/* Recent Activity Mini List */}
+            <div style={activityBoxStyle as any}>
+              <div style={activityHeaderStyle as any}>
+                <span style={activityTitleStyle as any}>Today's Verified Activity</span>
+                <span style={activityTotalStyle as any}>Total: ₹1,050</span>
+              </div>
+
+              <div style={txRowStyle as any}>
+                <div style={{ ...txIconBox, backgroundColor: WebColors.creamSoft }}>
+                  <Utensils size={13} color={WebColors.accentOrange} />
+                </div>
+                <div style={txInfoStyle as any}>
+                  <span style={txNameStyle as any}>Lunch at Subway</span>
+                  <span style={txMetaStyle as any}>01:15 PM • 1-Sec Voice Logged</span>
+                </div>
+                <span style={txAmountStyle as any}>-₹450</span>
+              </div>
+
+              <div style={txRowStyle as any}>
+                <div style={{ ...txIconBox, backgroundColor: WebColors.azureSoft }}>
+                  <Car size={13} color={WebColors.azure} />
+                </div>
+                <div style={txInfoStyle as any}>
+                  <span style={txNameStyle as any}>Uber ride to client office</span>
+                  <span style={txMetaStyle as any}>11:20 AM • Transport</span>
+                </div>
+                <span style={txAmountStyle as any}>-₹250</span>
+              </div>
+
+              <div style={txRowStyle as any}>
+                <div style={{ ...txIconBox, backgroundColor: WebColors.coralSoft }}>
+                  <Coffee size={13} color={WebColors.coral} />
+                </div>
+                <div style={txInfoStyle as any}>
+                  <span style={txNameStyle as any}>Starbucks Cold Brew</span>
+                  <span style={txMetaStyle as any}>09:30 AM • Food & Drink</span>
+                </div>
+                <span style={txAmountStyle as any}>-₹350</span>
+              </div>
+            </div>
+
+            {/* Floating 1-Sec Voice Logger Pill Tag on Mockup */}
+            <div style={floatingStickerStyle as any}>
+              <div style={pulsingMicCircleStyle as any}>
+                <Mic size={13} color="#FFFFFF" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: WebColors.inkSlate }}>"Paid 450 Subway"</span>
+                <span style={{ fontSize: '9px', fontWeight: '700', color: WebColors.accentOrange }}>VERIFIED RECEIPT IN 1s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
 
+// Styles
 const heroSectionStyle = {
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
-  paddingTop: 80,
-  paddingBottom: 60,
+  backgroundColor: WebColors.canvas,
+  paddingTop: '64px',
+  paddingBottom: '80px',
+  position: 'relative',
+  overflow: 'hidden',
   display: 'flex',
   justifyContent: 'center',
+};
+
+const ambientGlowStyle = {
+  position: 'absolute',
+  top: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: '100%',
+  maxWidth: '1200px',
+  height: '520px',
+  background: WebGradients.ambientHeroGlow,
+  pointerEvents: 'none',
+  zIndex: 0,
+};
+
+const heroContainerStyle = {
+  maxWidth: '1200px',
+  width: '100%',
+  padding: '0 24px',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+  gap: '48px',
   alignItems: 'center',
+  position: 'relative',
+  zIndex: 1,
+};
+
+const leftColStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+};
+
+const kickerBadgeStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '7px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
+  padding: '6px 14px',
+  borderRadius: '999px',
+  marginBottom: '20px',
+};
+
+const kickerTextStyle = {
+  fontSize: '11px',
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
 };
 
 const displayHeadlineStyle = {
-  fontSize: Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth < 768 ? 44 : 76,
-  lineHeight: 1.02,
-  letterSpacing: '-0.002em',
-  fontWeight: 900,
-  fontStyle: 'italic',
-  color: PlayfulColors.inkBlack,
-  fontFamily: PlayfulTypography.fontFamily,
-  textAlign: 'center',
-  margin: '0 0 24px 0',
+  fontSize: 'clamp(36px, 5.2vw, 58px)',
+  lineHeight: 1.08,
+  letterSpacing: '-0.035em',
+  fontWeight: 800,
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+  margin: '0 0 20px 0',
 };
 
-const compositeFormStyle = {
+const heroSubtextStyle = {
+  fontSize: '17px',
+  lineHeight: 1.6,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
+  maxWidth: '540px',
+  margin: '0 0 32px 0',
+};
+
+const formWrapperStyle = {
   width: '100%',
-  maxWidth: 540,
+  maxWidth: '520px',
 };
 
-const primaryButtonStyle = {
-  backgroundColor: PlayfulColors.hotMagenta,
-  padding: '0 26px',
-  height: '48px',
-  borderRadius: '99px',
+const formCardStyle = {
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '999px',
+  padding: '6px',
+  paddingLeft: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  border: `1.2px solid ${WebColors.borderCard}`,
+  boxShadow: WebShadows.cardRest,
+  marginBottom: '16px',
+};
+
+const emailInputStyle = {
+  flex: 1,
+  height: '46px',
+  fontSize: '15px',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.bodyFont,
+  outline: 'none',
+  border: 'none',
+  backgroundColor: 'transparent',
+};
+
+const submitBtnStyle = {
+  background: WebGradients.primarySunset,
+  color: '#FFFFFF',
+  padding: '0 24px',
+  height: '46px',
+  borderRadius: '999px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  border: 'none',
+  fontSize: '15px',
+  fontWeight: '700',
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.2px',
+  boxShadow: WebShadows.buttonPrimary,
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+};
+
+const successBoxStyle = {
+  backgroundColor: WebColors.emeraldSoft,
+  borderRadius: '18px',
+  padding: '16px 20px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  border: `1.2px solid ${WebColors.emeraldBorder}`,
+  marginBottom: '16px',
+};
+
+const successTitleStyle = {
+  color: WebColors.inkSlate,
+  fontSize: '15px',
+  fontWeight: '700',
+  fontFamily: WebTypography.displayFont,
+};
+
+const successSubStyle = {
+  color: WebColors.subSlate,
+  fontSize: '13px',
+  fontFamily: WebTypography.bodyFont,
+};
+
+const trustRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '10px',
+  paddingLeft: '6px',
+};
+
+const trustItemStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '5px',
+};
+
+const trustTextStyle = {
+  fontSize: '12px',
+  fontWeight: '600',
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const rightColStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+};
+
+const phoneMockupCardStyle = {
+  width: '100%',
+  maxWidth: '380px',
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '36px',
+  padding: '20px 22px 24px 22px',
+  border: `1.5px solid ${WebColors.borderCard}`,
+  boxShadow: WebShadows.floatingMockup,
+  position: 'relative',
+};
+
+const phoneHeaderRowStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '16px',
+  paddingHorizontal: '4px',
+};
+
+const timeTextStyle = {
+  fontSize: '12px',
+  fontWeight: '700',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+};
+
+const dynamicIslandNotchStyle = {
+  width: '76px',
+  height: '18px',
+  backgroundColor: WebColors.inkSlate,
+  borderRadius: '999px',
+};
+
+const statusIconsRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+};
+
+const batteryIconStyle = {
+  width: '20px',
+  height: '10px',
+  borderRadius: '3px',
+  border: `1.2px solid ${WebColors.inkSlate}`,
+  padding: '1px',
+};
+
+const batteryLevelStyle = {
+  width: '80%',
+  height: '100%',
+  backgroundColor: WebColors.inkSlate,
+  borderRadius: '1.5px',
+};
+
+const appUserRowStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '14px',
+};
+
+const appGreetingStyle = {
+  fontSize: '11.5px',
+  fontWeight: '600',
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const appTitleStyle = {
+  fontSize: '17px',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.3px',
+  margin: '2px 0 0 0',
+};
+
+const avatarCircleStyle = {
+  width: '34px',
+  height: '34px',
+  borderRadius: '17px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  border: 'none',
-  cursor: 'pointer',
-  transition: 'transform 0.15s ease',
+  fontSize: '12px',
+  fontWeight: '800',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
 };
 
-const primaryButtonTextStyle = {
-  color: '#FFFFFF',
-  fontSize: '16px',
-  fontWeight: 600,
-  fontFamily: PlayfulTypography.fontFamily,
-  letterSpacing: '-0.2px',
+const savingsCardStyle = {
+  backgroundColor: WebColors.surfaceSubtle,
+  borderRadius: '20px',
+  padding: '16px',
+  border: `1px solid ${WebColors.borderCard}`,
+  marginBottom: '16px',
 };
 
-const styles = StyleSheet.create({
-  heroContainer: {
-    maxWidth: 1200,
-    width: '100%',
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    textAlign: 'center',
-  },
-  kickerBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 46, 149, 0.08)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    marginBottom: 28,
-  },
-  kickerText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    color: PlayfulColors.hotMagenta,
-    fontFamily: PlayfulTypography.fontFamily,
-  },
-  heroSubtext: {
-    fontSize: 18,
-    lineHeight: 28,
-    color: PlayfulColors.slate,
-    fontFamily: PlayfulTypography.fontFamily,
-    maxWidth: 580,
-    textAlign: 'center',
-    marginBottom: 36,
-  },
-  compositeWrapper: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  inputCardPill: {
-    backgroundColor: PlayfulColors.paperWhite,
-    borderRadius: 99,
-    padding: 6,
-    paddingLeft: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: PlayfulColors.sand,
-    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.06)' as any,
-  },
-  emailInput: {
-    flex: 1,
-    height: 48,
-    fontSize: 16,
-    color: PlayfulColors.softInk,
-    fontFamily: PlayfulTypography.fontFamily,
-    outlineStyle: 'none' as any,
-    borderWidth: 0,
-    backgroundColor: 'transparent',
-  },
-  primaryPillCta: {
-    backgroundColor: PlayfulColors.hotMagenta,
-    paddingHorizontal: 26,
-    height: 48,
-    borderRadius: 99,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer' as any,
-  },
-  primaryPillCtaText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: PlayfulTypography.fontFamily,
-    letterSpacing: -0.2,
-  },
-  successPill: {
-    backgroundColor: PlayfulColors.paperWhite,
-    borderRadius: 99,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderWidth: 1,
-    borderColor: PlayfulColors.warmMist,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.06)' as any,
-  },
-  successText: {
-    color: PlayfulColors.softInk,
-    fontSize: 15,
-    fontWeight: '600',
-    fontFamily: PlayfulTypography.fontFamily,
-  },
-  helperText: {
-    marginTop: 14,
-    fontSize: 13,
-    color: PlayfulColors.stone,
-    fontFamily: PlayfulTypography.fontFamily,
-  },
-});
+const savingsCardHeaderStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: '6px',
+};
+
+const growthBadgePillStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
+  padding: '3px 8px',
+  borderRadius: '6px',
+  marginBottom: '4px',
+};
+
+const growthBadgeTextStyle = {
+  fontSize: '8.5px',
+  fontWeight: '800',
+  color: WebColors.accentOrange,
+  letterSpacing: '0.6px',
+  fontFamily: WebTypography.displayFont,
+};
+
+const amountHeroTextStyle = {
+  fontSize: '22px',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.5px',
+};
+
+const percentageTagStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
+  padding: '4px 8px',
+  borderRadius: '8px',
+};
+
+const percentageNumberStyle = {
+  fontSize: '12px',
+  fontWeight: '800',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
+};
+
+const percentageSubStyle = {
+  fontSize: '7.5px',
+  fontWeight: '700',
+  color: WebColors.accentOrange,
+  letterSpacing: '0.5px',
+  fontFamily: WebTypography.displayFont,
+};
+
+const chartWrapperStyle = {
+  width: '100%',
+  height: '70px',
+  margin: '8px 0 10px 0',
+};
+
+const safePaceBoxStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '10px',
+  padding: '8px 12px',
+  border: `1px solid ${WebColors.borderHairline}`,
+};
+
+const safePaceDotStyle = {
+  width: '7px',
+  height: '7px',
+  borderRadius: '3.5px',
+  backgroundColor: WebColors.emerald,
+};
+
+const safePaceTextStyle = {
+  fontSize: '11.5px',
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const activityBoxStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+};
+
+const activityHeaderStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '2px',
+};
+
+const activityTitleStyle = {
+  fontSize: '12px',
+  fontWeight: '700',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+};
+
+const activityTotalStyle = {
+  fontSize: '11px',
+  fontWeight: '600',
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const txRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '8px 10px',
+  backgroundColor: WebColors.surfaceSubtle,
+  borderRadius: '12px',
+  border: `1px solid ${WebColors.borderHairline}`,
+};
+
+const txIconBox = {
+  width: '28px',
+  height: '28px',
+  borderRadius: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const txInfoStyle = {
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const txNameStyle = {
+  fontSize: '12px',
+  fontWeight: '600',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const txMetaStyle = {
+  fontSize: '9.5px',
+  color: WebColors.mutedSlate,
+  fontFamily: WebTypography.bodyFont,
+};
+
+const txAmountStyle = {
+  fontSize: '12px',
+  fontWeight: '700',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+};
+
+const floatingStickerStyle = {
+  position: 'absolute',
+  bottom: '-14px',
+  right: '-14px',
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '16px',
+  padding: '8px 14px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  border: `1.2px solid ${WebColors.creamBorderStrong}`,
+  boxShadow: '0 8px 24px rgba(255, 107, 0, 0.18)',
+};
+
+const pulsingMicCircleStyle = {
+  width: '28px',
+  height: '28px',
+  borderRadius: '14px',
+  background: WebGradients.primarySunset,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxShadow: '0 2px 8px rgba(255, 107, 0, 0.3)',
+};

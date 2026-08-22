@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react-native';
-import { PlayfulColors, PlayfulTypography, PlayfulShadows, PlayfulRadii } from '@/constants/playful-tokens';
+import { WebColors, WebShadows, WebTypography } from '@/constants/web-tokens';
 
 interface FaqItem {
   id: string;
@@ -13,31 +13,31 @@ const FAQ_DATA: FaqItem[] = [
     id: 'faq_1',
     question: 'How is Looop different from traditional budgeting apps?',
     answer:
-      'Traditional apps rely on manual bookkeeping and punitive red bars that cause guilt. Looop uses conversational AI and behavioral psychology to diagnose root habit triggers, connect spending to your health/sleep, and turn weekly micro-wins directly into funded dream vaults.',
+      'Traditional budgeting apps rely on tedious manual dropdowns and punitive red bars that cause guilt. Looop uses natural voice recognition and behavioral psychology to diagnose root spending triggers, connect expenses to your sleep and health, and turn weekly micro-wins directly into funded milestone vaults.',
   },
   {
     id: 'faq_2',
     question: 'Is my financial transaction data private and secure?',
     answer:
-      'Yes, 100%. Looop is built with a local-first architecture using encrypted on-device SQLite storage. Your personal financial data and voice memos stay on your device and are never sold or shared with advertisers.',
+      'Yes, 100%. Looop is built with a local-first architecture using encrypted on-device SQLite storage. Your personal financial transactions and voice memos stay on your physical device—we do not scrape your bank accounts with Plaid and never sell data to advertisers.',
   },
   {
     id: 'faq_3',
-    question: 'How does natural voice logging work?',
+    question: 'How does 1-second natural voice logging work?',
     answer:
-      'Simply tap the mic and say what you spent in plain English or Hinglish (e.g., "Paid 450 for lunch Subway via UPI"). Looop streams your speech in real-time and verifies the amount, category, time, and payment method into a clean receipt in 2 seconds.',
+      'Simply tap the mic and say what you spent in plain English or Hinglish (e.g., "Paid 450 for lunch Subway via UPI"). Looop streams your speech in real-time and verifies the amount, category, merchant, and payment method into a structured receipt in 1 second.',
   },
   {
     id: 'faq_4',
     question: 'What are Milestone Savings Vaults?',
     answer:
-      'Vaults are dedicated targets for things you genuinely care about — like a Smart Fitness Ring, a Family Goa Trip, or a 3-Month Safety Buffer. When you complete weekly habit tasks, your savings are automatically calculated and routed straight into your active vault.',
+      'Vaults are dedicated targets for things you genuinely care about — like a Smart Fitness Ring, a Family Vacation, or a 3-Month Emergency Cushion. When you complete weekly habit challenges, your saved surplus is automatically calculated and routed straight into your active vault.',
   },
   {
     id: 'faq_5',
-    question: 'Can I use Looop on both Mobile and Web?',
+    question: 'Can I use Looop across both Mobile and Web?',
     answer:
-      'Yes! Looop runs as a native app on iOS and Android, and as a lightweight web app on desktop and mobile browsers.',
+      'Yes! Looop runs as a native application on iOS and Android with biometric Face ID security, and as a lightweight web app on desktop and mobile browsers.',
   },
 ];
 
@@ -54,19 +54,21 @@ export const FaqSection: React.FC = () => {
         {/* Left Column: Label + Display Heading */}
         <div style={leftColStyle as any}>
           <div style={tagRowStyle as any}>
-            <Sparkles size={13} color={PlayfulColors.hotMagenta} />
+            <Sparkles size={13} color={WebColors.primaryOrange} />
             <span style={tagTextStyle as any}>GOT QUESTIONS?</span>
           </div>
+
           <h2 style={leftHeadingStyle as any}>
             Things people<br />
-            <span style={{ color: PlayfulColors.hotMagenta }}>want to know.</span>
+            <span style={{ color: WebColors.primaryOrange }}>want to know.</span>
           </h2>
+
           <p style={leftSubtextStyle as any}>
             Everything you need to know about Looop, privacy, AI habit diagnosis, and milestone vaults.
           </p>
         </div>
 
-        {/* Right Column: Stacked 44px Paper White Accordion Cards */}
+        {/* Right Column: Stacked Paper White Accordion Cards */}
         <div style={rightColStyle as any}>
           {FAQ_DATA.map((item) => {
             const isOpen = openId === item.id;
@@ -77,7 +79,8 @@ export const FaqSection: React.FC = () => {
                 style={
                   {
                     ...faqCardStyle,
-                    borderColor: isOpen ? PlayfulColors.sand : PlayfulColors.warmMist,
+                    borderColor: isOpen ? WebColors.creamBorderStrong : WebColors.borderCard,
+                    boxShadow: isOpen ? WebShadows.cardHover : WebShadows.cardRest,
                   } as any
                 }
               >
@@ -88,10 +91,11 @@ export const FaqSection: React.FC = () => {
                       {
                         ...chevronContainerStyle,
                         transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        backgroundColor: isOpen ? WebColors.creamSoft : WebColors.surfaceSubtle,
                       } as any
                     }
                   >
-                    <ChevronDown size={20} color={isOpen ? PlayfulColors.hotMagenta : PlayfulColors.stone} />
+                    <ChevronDown size={18} color={isOpen ? WebColors.accentOrange : WebColors.mutedSlate} />
                   </div>
                 </div>
 
@@ -111,59 +115,62 @@ export const FaqSection: React.FC = () => {
 
 const faqSectionWrapper = {
   width: '100%',
-  backgroundColor: PlayfulColors.oatCanvas,
-  padding: '113px 0',
+  backgroundColor: WebColors.canvas,
+  padding: '96px 0',
+  display: 'flex',
+  justifyContent: 'center',
 };
 
 const faqContainer = {
-  maxWidth: 1200,
+  maxWidth: '1200px',
+  width: '100%',
   margin: '0 auto',
   padding: '0 24px',
   display: 'grid',
-  gridTemplateColumns: '1fr 1.35fr',
-  gap: '64px',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+  gap: '56px',
   alignItems: 'start',
 };
 
 const leftColStyle = {
   position: 'sticky',
-  top: '120px',
+  top: '100px',
 };
 
 const tagRowStyle = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '8px',
-  backgroundColor: 'rgba(255, 46, 149, 0.08)',
+  gap: '7px',
+  backgroundColor: WebColors.creamSoft,
+  border: `1px solid ${WebColors.creamBorder}`,
   padding: '6px 14px',
-  borderRadius: '99px',
-  marginBottom: '20px',
+  borderRadius: '999px',
+  marginBottom: '18px',
 };
 
 const tagTextStyle = {
   fontSize: '11px',
-  fontWeight: '700',
-  letterSpacing: '1px',
-  color: PlayfulColors.hotMagenta,
-  fontFamily: PlayfulTypography.fontFamily,
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
 };
 
 const leftHeadingStyle = {
-  fontSize: '42px',
-  lineHeight: 1.1,
-  fontWeight: 900,
-  fontStyle: 'italic',
-  color: PlayfulColors.inkBlack,
-  fontFamily: PlayfulTypography.fontFamily,
+  fontSize: 'clamp(32px, 4.5vw, 42px)',
+  lineHeight: 1.12,
+  fontWeight: 800,
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
   margin: '0 0 16px 0',
-  letterSpacing: '-0.5px',
+  letterSpacing: '-0.03em',
 };
 
 const leftSubtextStyle = {
   fontSize: '16px',
   lineHeight: 1.6,
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
   maxWidth: '380px',
   margin: 0,
 };
@@ -171,17 +178,16 @@ const leftSubtextStyle = {
 const rightColStyle = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  gap: '14px',
 };
 
 const faqCardStyle = {
-  backgroundColor: PlayfulColors.paperWhite,
-  borderRadius: `${PlayfulRadii.cards}px`,
-  padding: '28px 32px',
-  boxShadow: PlayfulShadows.cardStack,
-  border: `1px solid ${PlayfulColors.warmMist}`,
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '20px',
+  padding: '24px 28px',
+  border: `1.2px solid ${WebColors.borderCard}`,
   cursor: 'pointer',
-  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease',
 };
 
 const faqHeaderRowStyle = {
@@ -192,12 +198,11 @@ const faqHeaderRowStyle = {
 };
 
 const faqQuestionStyle = {
-  fontSize: '18px',
+  fontSize: '16.5px',
   fontWeight: '700',
-  fontStyle: 'italic',
   lineHeight: 1.35,
-  color: PlayfulColors.inkBlack,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
   margin: 0,
 };
 
@@ -205,7 +210,6 @@ const chevronContainerStyle = {
   width: '32px',
   height: '32px',
   borderRadius: '16px',
-  backgroundColor: PlayfulColors.oatCanvas,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -214,15 +218,15 @@ const chevronContainerStyle = {
 };
 
 const faqBodyContainerStyle = {
-  marginTop: '16px',
-  paddingTop: '16px',
-  borderTop: `1px solid ${PlayfulColors.warmMist}`,
+  marginTop: '14px',
+  paddingTop: '14px',
+  borderTop: `1px solid ${WebColors.borderHairline}`,
 };
 
 const faqAnswerStyle = {
-  fontSize: '15px',
+  fontSize: '14.5px',
   lineHeight: 1.65,
-  color: PlayfulColors.slate,
-  fontFamily: PlayfulTypography.fontFamily,
+  color: WebColors.subSlate,
+  fontFamily: WebTypography.bodyFont,
   margin: 0,
 };
