@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './mmkv-storage';
-
 import * as Localization from 'expo-localization';
+import { getDeviceLanguage, changeAppLanguage } from '@/i18n';
 
 export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR' | 'CAD' | 'AUD' | 'JPY';
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -11,6 +11,7 @@ export type BiometricType = 'face' | 'fingerprint' | 'biometric' | 'none';
 interface AppState {
   currency: CurrencyCode;
   currencySymbol: string;
+  language: string;
   themeMode: ThemeMode;
   hasCompletedOnboarding: boolean;
 
@@ -29,6 +30,7 @@ interface AppState {
 
   // Actions
   setCurrency: (currency: CurrencyCode) => void;
+  setLanguage: (language: string) => void;
   setThemeMode: (theme: ThemeMode) => void;
   setHasCompletedOnboarding: (completed: boolean) => void;
 
@@ -77,6 +79,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       currency: defaultCurrency.code,
       currencySymbol: defaultCurrency.symbol,
+      language: getDeviceLanguage(),
       themeMode: 'system',
       hasCompletedOnboarding: false,
 
@@ -99,6 +102,11 @@ export const useAppStore = create<AppState>()(
           currencySymbol: CURRENCY_SYMBOLS[currency] || '$',
         }),
 
+      setLanguage: (language) => {
+        changeAppLanguage(language);
+        set({ language });
+      },
+
       setThemeMode: (themeMode) => set({ themeMode }),
       setHasCompletedOnboarding: (hasCompletedOnboarding) =>
         set({ hasCompletedOnboarding }),
@@ -120,6 +128,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         currency: state.currency,
         currencySymbol: state.currencySymbol,
+        language: state.language,
         themeMode: state.themeMode,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         biometricsEnabled: state.biometricsEnabled,

@@ -10,6 +10,7 @@ interface IAnimatedInput extends Omit<TextInputProps, "placeholder"> {
   readonly animationInterval?: number;
   readonly containerStyle?: StyleProp<ViewStyle>;
   readonly inputWrapperStyle?: StyleProp<ViewStyle>;
+  readonly placeholderWrapperStyle?: StyleProp<ViewStyle>;
   readonly inputStyle?: StyleProp<TextStyle>;
   readonly placeholderStyle?: StyleProp<TextStyle>;
   readonly characterEnterDuration?: number;

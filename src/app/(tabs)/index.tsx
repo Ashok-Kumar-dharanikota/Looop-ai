@@ -1,47 +1,47 @@
-import React, { useMemo, useState } from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
 import { FlashList } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
-import { LineChart, PieChart } from 'react-native-gifted-charts';
+import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import {
+  Activity,
   Bell,
-  Car,
   Bus,
+  Car,
   Coffee,
+  CreditCard,
   HeartPulse,
+  PieChart as PieIcon,
   Plane,
-  ShoppingBag,
   PlaySquare,
+  ShieldCheck,
+  ShoppingBag,
   Sparkles,
   TrendingUp,
   Utensils,
   Wallet,
-  PieChart as PieIcon,
-  Activity,
-  ShieldCheck,
-  CreditCard,
   Zap,
 } from 'lucide-react-native';
-
+import { useMemo, useState } from 'react';
 import {
-  useTransactions,
-  useMilestoneVaults,
-  useWeeklyGoals,
-  useUserSettings,
-} from '@/hooks/use-database';
-import { useAppStore, useUserStore } from '@/store';
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { LineChart, PieChart } from 'react-native-gifted-charts';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useAuth } from '@/hooks/use-auth';
+import {
+  useMilestoneVaults,
+  useTransactions,
+  useUserSettings,
+  useWeeklyGoals,
+} from '@/hooks/use-database';
 import { RollingCounter } from '@/shared/ui/organisms/rolling-counter';
+import { useAppStore, useUserStore } from '@/store';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -240,10 +240,10 @@ export default function HomeScreen() {
         dataPointRadius: day.isToday ? 5 : 3,
         customDataPoint: day.isToday
           ? () => (
-              <View style={styles.dataPointOuterGreen}>
-                <View style={styles.dataPointInnerGreen} />
-              </View>
-            )
+            <View style={styles.dataPointOuterGreen}>
+              <View style={styles.dataPointInnerGreen} />
+            </View>
+          )
           : undefined,
       };
 

@@ -4,6 +4,7 @@ import {
   View,
   StyleSheet,
   TextStyle,
+  ViewStyle,
   StyleProp,
 } from "react-native";
 import Animated, {
@@ -117,17 +118,18 @@ const Character: React.FC<ICharacter> & React.FunctionComponent<ICharacter> = ({
 };
 
 const StaggeredPlaceholder: React.FC<{
-  text: string;
+  text?: string;
   enterDuration: number;
   exitDuration: number;
   delayIncrement: number;
   style?: StyleProp<TextStyle>;
-}> = ({ text, enterDuration, exitDuration, delayIncrement, style }) => {
-  const characters = Array.from(text);
+  wrapperStyle?: StyleProp<ViewStyle>;
+}> = ({ text = "", enterDuration, exitDuration, delayIncrement, style, wrapperStyle }) => {
+  const characters = Array.from(text || "");
 
   return (
     <Animated.View
-      style={styles.placeholderWrapper}
+      style={[styles.placeholderWrapper, wrapperStyle]}
       layout={LinearTransition.duration(300).easing(
         Easing.bezier(0.25, 0.1, 0.25, 1),
       )}
@@ -150,7 +152,7 @@ const StaggeredPlaceholder: React.FC<{
 const AnimatedInput: React.FC<IAnimatedInput> &
   React.FunctionComponent<IAnimatedInput> = memo<IAnimatedInput>(
   ({
-    placeholders,
+    placeholders = [],
     animationInterval = 3000,
     value,
     onChangeText,
@@ -158,6 +160,7 @@ const AnimatedInput: React.FC<IAnimatedInput> &
       width: "100%",
     },
     inputWrapperStyle,
+    placeholderWrapperStyle,
     inputStyle,
     placeholderStyle,
     characterEnterDuration = 300,
@@ -198,8 +201,8 @@ const AnimatedInput: React.FC<IAnimatedInput> &
     }, [currentIndex, blurAnimationDuration]);
 
     useEffect(() => {
-      if (isFocused || inputValue) return;
-      const timeout = setTimeout<[]>(() => {
+      if (isFocused || inputValue || !placeholders?.length) return;
+      const timeout = setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % placeholders.length);
       }, animationInterval);
 
@@ -208,7 +211,7 @@ const AnimatedInput: React.FC<IAnimatedInput> &
       currentIndex,
       isFocused,
       inputValue,
-      placeholders.length,
+      placeholders?.length,
       animationInterval,
     ]);
 
@@ -229,13 +232,13 @@ const AnimatedInput: React.FC<IAnimatedInput> &
     return (
       <View style={[styles.wrapper, containerStyle]}>
         <View style={[styles.inputWrapper, inputWrapperStyle]}>
-          {!isFocused && !inputValue && (
+          {!isFocused && !inputValue && placeholders && placeholders.length > 0 && (
             <StaggeredPlaceholder
-              text={placeholders[currentIndex]}
+              text={placeholders[currentIndex] || ""}
               enterDuration={characterEnterDuration}
               exitDuration={characterExitDuration}
               delayIncrement={characterDelayIncrement}
-              // style={[styles.character as any, placeholderStyle as any]}
+              wrapperStyle={placeholderWrapperStyle}
               style={[styles.character, placeholderStyle] as any}
             />
           )}
@@ -246,6 +249,7 @@ const AnimatedInput: React.FC<IAnimatedInput> &
                 overflow: "hidden",
               },
             ]}
+            pointerEvents="none"
             animatedProps={animatedBlurViewProps}
           />
           <TextInput
@@ -269,9 +273,9 @@ const AnimatedInput: React.FC<IAnimatedInput> &
   },
 );
 
-export default memo<
-  React.FC<IAnimatedInput> & React.FunctionComponent<IAnimatedInput>
->(AnimatedInput);
+export { AnimatedInput };
+export * from "./types";
+export default AnimatedInput;
 
 const styles = StyleSheet.create({
   wrapper: {

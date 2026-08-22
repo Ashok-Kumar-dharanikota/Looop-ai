@@ -35,7 +35,8 @@ import { useAppStore, CurrencyCode, CURRENCY_SYMBOLS } from '@/store';
 import {
   DEFAULT_MUST_PAYMENTS,
   MustPaymentItem,
-} from '@/components/onboarding/StoryAct2Questionnaire';
+} from '@/features/onboarding';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -89,7 +90,7 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { settings, mustPayments: savedMustPayments, saveSettings } = useUserSettings();
-  const { currency, currencySymbol, setCurrency } = useAppStore();
+  const { currency, currencySymbol, setCurrency, language, setLanguage } = useAppStore();
 
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(currency);
   const [income, setIncome] = useState(settings.monthlyIncome || '');
@@ -330,6 +331,42 @@ export const FinancialProfileModal: React.FC<FinancialProfileModalProps> = ({
                       ]}
                     >
                       {c.symbol} {c.code}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* App Language Selector Section */}
+            <Text style={[styles.sectionLabel, { marginTop: 16 }]}>APP LANGUAGE</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.currencyChipsRow}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => {
+                const isSelected = language === lang.code;
+                return (
+                  <TouchableOpacity
+                    key={lang.code}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setLanguage(lang.code);
+                    }}
+                    style={[
+                      styles.currencyChip,
+                      isSelected && styles.currencyChipSelected,
+                    ]}
+                  >
+                    <Text style={styles.currencyFlag}>{lang.flag}</Text>
+                    <Text
+                      style={[
+                        styles.currencyChipText,
+                        isSelected && styles.currencyChipTextSelected,
+                      ]}
+                    >
+                      {lang.nativeName}
                     </Text>
                   </TouchableOpacity>
                 );
