@@ -10,17 +10,13 @@ import { WebFooter } from '@/components/web/WebFooter';
 import { WebColors } from '@/constants/web-tokens';
 
 export default function WebLandingPage() {
-  const handleJoinWaitlist = (email: string) => {
-    console.log('User joined waitlist:', email);
-  };
-
   return (
     <div style={pageContainerStyle as any}>
       {/* Sticky Top Navigation Header */}
       <WebHeader />
 
-      {/* Hero Stage with Dual-Column Value Prop + Floating Phone Mockup */}
-      <LandingHero onJoinWaitlist={handleJoinWaitlist} />
+      {/* Hero Stage with Value Prop + Store Badges + Floating Phone Mockup */}
+      <LandingHero />
 
       {/* Hardware-accelerated Capability Ticker */}
       <CategoryNavBand />
@@ -34,8 +30,8 @@ export default function WebLandingPage() {
       {/* Interactive FAQ Accordion */}
       <FaqSection />
 
-      {/* Final Closing VIP Waitlist Card */}
-      <FinalCtaSection onJoinWaitlist={handleJoinWaitlist} />
+      {/* Final Closing Launch Card */}
+      <FinalCtaSection />
 
       {/* Footer with Legal & Privacy Links */}
       <WebFooter />

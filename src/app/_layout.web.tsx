@@ -22,9 +22,43 @@ export default function WebRootLayout() {
   }, [pathname]);
 
   useEffect(() => {
-    // Inject global web styles for full window scrolling and typography smoothing
+    // Inject global web styles and OpenGraph meta tags
     if (typeof document !== 'undefined') {
-      // 1. Inject Google Fonts link if not present
+      // 1. Document Title
+      document.title = 'Looop — AI Financial Biographer & Private Vault';
+
+      // 2. OpenGraph and Twitter Meta Tags Helper
+      const setMetaTag = (attr: 'name' | 'property', key: string, content: string) => {
+        let el = document.querySelector(`meta[${attr}="${key}"]`);
+        if (!el) {
+          el = document.createElement('meta');
+          el.setAttribute(attr, key);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', content);
+      };
+
+      // Standard SEO
+      setMetaTag('name', 'description', 'A private, local-first personal finance companion that transforms daily cashflow into lasting wealth and mindful habits.');
+      setMetaTag('name', 'theme-color', '#FAF9F6');
+
+      // OpenGraph Facebook / WhatsApp / LinkedIn / iMessage
+      setMetaTag('property', 'og:type', 'website');
+      setMetaTag('property', 'og:title', 'Looop — Master Daily Cashflow. Fund Life Milestones.');
+      setMetaTag('property', 'og:description', 'A private, local-first personal finance companion that turns micro-spending habits into funded dream vaults. Coming soon to App Store & Google Play.');
+      setMetaTag('property', 'og:url', 'https://looop.expo.app');
+      setMetaTag('property', 'og:image', 'https://looop.expo.app/og-image.png');
+      setMetaTag('property', 'og:image:width', '1200');
+      setMetaTag('property', 'og:image:height', '630');
+      setMetaTag('property', 'og:site_name', 'Looop');
+
+      // Twitter Cards
+      setMetaTag('name', 'twitter:card', 'summary_large_image');
+      setMetaTag('name', 'twitter:title', 'Looop — Master Daily Cashflow. Fund Life Milestones.');
+      setMetaTag('name', 'twitter:description', 'A private, local-first personal finance companion that turns micro-spending habits into funded dream vaults. Coming soon to App Store & Google Play.');
+      setMetaTag('name', 'twitter:image', 'https://looop.expo.app/og-image.png');
+
+      // 3. Inject Google Fonts link if not present
       const fontLinkId = 'looop-google-fonts';
       if (!document.getElementById(fontLinkId)) {
         const link = document.createElement('link');
@@ -35,7 +69,7 @@ export default function WebRootLayout() {
         document.head.appendChild(link);
       }
 
-      // 2. Inject global CSS rules
+      // 4. Inject global CSS rules
       const styleId = 'looop-web-global-styles';
       let style = document.getElementById(styleId) as HTMLStyleElement;
       if (!style) {
@@ -88,9 +122,6 @@ export default function WebRootLayout() {
         a {
           text-decoration: none;
           color: inherit;
-        }
-        input::placeholder {
-          color: #94A3B8;
         }
 
         /* Hardware-accelerated Keyframe Animations */
@@ -154,5 +185,3 @@ export default function WebRootLayout() {
     </QueryClientProvider>
   );
 }
-
-

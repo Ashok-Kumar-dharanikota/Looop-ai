@@ -75,10 +75,10 @@ export const WebHeader: React.FC<WebHeaderProps> = ({ onCtaPress }) => {
         <View style={styles.headerRight}>
           <button
             type="button"
-            onClick={onCtaPress || (() => handleNavClick('waitlist'))}
+            onClick={onCtaPress || (() => handleNavClick('download'))}
             style={ctaButtonStyle as any}
           >
-            <span>Get Early Access</span>
+            <span>Coming Soon</span>
             <ArrowRight size={15} color="#FFFFFF" strokeWidth={2.4} />
           </button>
         </View>

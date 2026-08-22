@@ -1,82 +1,69 @@
-import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, Sparkles, Lock } from 'lucide-react-native';
+import React from 'react';
+import { ShieldCheck, Sparkles, Smartphone } from 'lucide-react-native';
 import { WebColors, WebGradients, WebShadows, WebTypography } from '@/constants/web-tokens';
 
-interface FinalCtaSectionProps {
-  onJoinWaitlist?: (email: string) => void;
-}
-
-export const FinalCtaSection: React.FC<FinalCtaSectionProps> = ({ onJoinWaitlist }) => {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!email || !email.includes('@')) return;
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      if (onJoinWaitlist) onJoinWaitlist(email);
-    }, 400);
-  };
-
+export const FinalCtaSection: React.FC = () => {
   return (
-    <section style={finalSectionStyle as any}>
-      <div style={containerStyle as any}>
-        {/* App Icon Mark */}
-        <div style={appIconContainerStyle as any}>
-          <Sparkles size={28} color={WebColors.primaryOrange} />
+    <section style={sectionStyle as any} id="download">
+      <div style={cardWrapperStyle as any}>
+        {/* Top Glow & Badge */}
+        <div style={badgeStyle as any}>
+          <Sparkles size={13} color={WebColors.primaryOrange} />
+          <span style={badgeTextStyle as any}>LAUNCHING ON IOS & ANDROID</span>
         </div>
 
-        {/* Display Headline */}
-        <h2 style={displayHeadlineStyle as any}>
-          Start building wealth<br />
-          <span style={{ color: WebColors.primaryOrange }}>
-            without changing who you are.
-          </span>
+        {/* Big Headline */}
+        <h2 style={headlineStyle as any}>
+          Ready to turn daily habits into life-changing milestones?
         </h2>
 
-        <p style={subheadStyle as any}>
-          Join mindful spenders who turned everyday habit loops into fully funded dream milestones. 100% private, local-first on iOS, Android & Web.
+        <p style={subtextStyle as any}>
+          Looop is built for those who want financial clarity without tedious budgeting chores. 100% private, local-first, and powered by intelligent behavioral essays.
         </p>
 
-        {/* Composite Email + Pill CTA */}
-        <div style={compositeWrapperStyle as any}>
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} style={formCardStyle as any}>
-              <input
-                type="email"
-                placeholder="Enter your email to claim VIP access..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={inputStyle as any}
-                required
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={buttonStyle as any}
-              >
-                <span>{isSubmitting ? 'Joining...' : 'Get Early Access'}</span>
-                <ArrowRight size={16} color="#FFFFFF" strokeWidth={2.4} />
-              </button>
-            </form>
-          ) : (
-            <div style={successPillStyle as any}>
-              <CheckCircle2 size={20} color={WebColors.emerald} />
-              <span style={successTextStyle as any}>
-                Welcome to Looop! You’ll receive early access credentials soon.
-              </span>
+        {/* Store Badges Row */}
+        <div style={storeBadgesRowStyle as any}>
+          {/* Apple App Store */}
+          <div style={storeBadgeCardStyle as any}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#0F172A">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 0.92-2.87-.93.04-2.02.63-2.66 1.38-.56.65-1.06 1.71-.93 2.74 1.05.08 2.08-.54 2.67-1.25z" />
+            </svg>
+            <div style={badgeTextColStyle as any}>
+              <span style={badgeSubtextStyle as any}>COMING SOON TO</span>
+              <span style={badgeTitleStyle as any}>Apple App Store</span>
             </div>
-          )}
+          </div>
 
-          {/* Privacy Note */}
-          <div style={bottomNoteRowStyle as any}>
-            <Lock size={12} color={WebColors.mutedSlate} />
-            <span style={bottomNoteTextStyle as any}>Zero spam. Encrypted local-first SQLite architecture.</span>
+          {/* Google Play Store */}
+          <div style={storeBadgeCardStyle as any}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M3.609 1.814L13.792 12 3.61 22.186c-.36-.37-.61-.924-.61-1.613V3.427c0-.689.25-1.243.61-1.613z" fill="#00C3FF" />
+              <path d="M17.204 8.587l-3.412 3.413 3.412 3.413 3.906-2.22c1.118-.636 1.118-1.75 0-2.386l-3.906-2.22z" fill="#FFD400" />
+              <path d="M3.609 1.814l10.183 10.186 3.412-3.413-11.45-6.507c-.773-.44-1.605-.447-2.145-.266z" fill="#00E676" />
+              <path d="M13.792 12L3.61 22.186c.54.18 1.372.174 2.144-.266l11.45-6.507-3.412-3.413z" fill="#FF334C" />
+            </svg>
+            <div style={badgeTextColStyle as any}>
+              <span style={badgeSubtextStyle as any}>COMING SOON TO</span>
+              <span style={badgeTitleStyle as any}>Google Play Store</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Checkpoints */}
+        <div style={featureTagsRowStyle as any}>
+          <div style={tagItemStyle as any}>
+            <ShieldCheck size={14} color={WebColors.emerald} />
+            <span style={tagTextStyle as any}>Encrypted SQLite Database</span>
+          </div>
+          <span style={{ color: WebColors.borderStrong }}>•</span>
+          <div style={tagItemStyle as any}>
+            <Smartphone size={14} color={WebColors.primaryOrange} />
+            <span style={tagTextStyle as any}>Offline-First Performance</span>
+          </div>
+          <span style={{ color: WebColors.borderStrong }}>•</span>
+          <div style={tagItemStyle as any}>
+            <Sparkles size={14} color={WebColors.accentOrange} />
+            <span style={tagTextStyle as any}>Zero Ad Trackers</span>
           </div>
         </div>
       </div>
@@ -84,135 +71,129 @@ export const FinalCtaSection: React.FC<FinalCtaSectionProps> = ({ onJoinWaitlist
   );
 };
 
-const finalSectionStyle = {
+const sectionStyle = {
   width: '100%',
-  backgroundColor: WebColors.canvas,
-  padding: '96px 24px 110px 24px',
+  padding: '60px 24px 100px 24px',
   display: 'flex',
   justifyContent: 'center',
+  backgroundColor: WebColors.canvas,
+};
+
+const cardWrapperStyle = {
+  maxWidth: '920px',
+  width: '100%',
+  backgroundColor: WebColors.cardWhite,
+  borderRadius: '32px',
+  padding: '56px 40px',
+  border: `1.5px solid ${WebColors.borderCard}`,
+  boxShadow: WebShadows.cardRest,
+  display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   textAlign: 'center',
   position: 'relative',
+  overflow: 'hidden',
 };
 
-const containerStyle = {
-  maxWidth: '760px',
-  margin: '0 auto',
-  display: 'flex',
-  flexDirection: 'column',
+const badgeStyle = {
+  display: 'inline-flex',
   alignItems: 'center',
-};
-
-const appIconContainerStyle = {
-  width: '60px',
-  height: '60px',
-  borderRadius: '20px',
+  gap: '6px',
   backgroundColor: WebColors.creamSoft,
-  border: `1.5px solid ${WebColors.creamBorderStrong}`,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: '28px',
-  boxShadow: '0 8px 24px rgba(255, 107, 0, 0.16)',
+  border: `1px solid ${WebColors.creamBorder}`,
+  padding: '6px 14px',
+  borderRadius: '999px',
+  marginBottom: '20px',
 };
 
-const displayHeadlineStyle = {
-  fontSize: 'clamp(32px, 4.8vw, 48px)',
-  lineHeight: 1.12,
+const badgeTextStyle = {
+  fontSize: '11px',
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.accentOrange,
+  fontFamily: WebTypography.displayFont,
+};
+
+const headlineStyle = {
+  fontSize: 'clamp(28px, 4.2vw, 44px)',
+  lineHeight: 1.15,
   fontWeight: 800,
   color: WebColors.inkSlate,
   fontFamily: WebTypography.displayFont,
-  margin: '0 0 16px 0',
   letterSpacing: '-0.03em',
+  maxWidth: '680px',
+  margin: '0 0 16px 0',
 };
 
-const subheadStyle = {
-  fontSize: '16.5px',
+const subtextStyle = {
+  fontSize: '16px',
   lineHeight: 1.6,
   color: WebColors.subSlate,
   fontFamily: WebTypography.bodyFont,
-  maxWidth: '540px',
-  margin: '0 0 32px 0',
+  maxWidth: '560px',
+  margin: '0 0 36px 0',
 };
 
-const compositeWrapperStyle = {
-  width: '100%',
-  maxWidth: '500px',
+const storeBadgesRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '16px',
+  flexWrap: 'wrap',
+  marginBottom: '32px',
+};
+
+const storeBadgeCardStyle = {
+  backgroundColor: WebColors.surfaceSubtle,
+  borderRadius: '18px',
+  padding: '12px 24px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  border: `1.2px solid ${WebColors.borderCard}`,
+  boxShadow: '0 4px 12px rgba(15, 23, 42, 0.04)',
+  transition: 'transform 0.15s ease',
+};
+
+const badgeTextColStyle = {
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
+  alignItems: 'flex-start',
 };
 
-const formCardStyle = {
-  width: '100%',
-  backgroundColor: WebColors.cardWhite,
-  borderRadius: '999px',
-  padding: '6px',
-  paddingLeft: '20px',
-  display: 'flex',
-  alignItems: 'center',
-  border: `1.2px solid ${WebColors.borderCard}`,
-  boxShadow: WebShadows.cardRest,
-  marginBottom: '12px',
-};
-
-const inputStyle = {
-  flex: 1,
-  height: '46px',
-  fontSize: '15px',
-  color: WebColors.inkSlate,
-  fontFamily: WebTypography.bodyFont,
-  outline: 'none',
-  border: 'none',
-  backgroundColor: 'transparent',
-};
-
-const buttonStyle = {
-  background: WebGradients.primarySunset,
-  color: '#FFFFFF',
-  padding: '0 24px',
-  height: '46px',
-  borderRadius: '999px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  border: 'none',
-  fontSize: '15px',
-  fontWeight: '700',
+const badgeSubtextStyle = {
+  fontSize: '9px',
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.mutedSlate,
   fontFamily: WebTypography.displayFont,
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-  boxShadow: WebShadows.buttonPrimary,
+};
+
+const badgeTitleStyle = {
+  fontSize: '15px',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
   letterSpacing: '-0.2px',
-  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
 };
 
-const successPillStyle = {
-  backgroundColor: WebColors.emeraldSoft,
-  borderRadius: '999px',
-  padding: '14px 24px',
+const featureTagsRowStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  border: `1.2px solid ${WebColors.emeraldBorder}`,
-  marginBottom: '12px',
+  justifyContent: 'center',
+  flexWrap: 'wrap',
+  gap: '12px',
 };
 
-const successTextStyle = {
-  color: WebColors.inkSlate,
-  fontSize: '14.5px',
-  fontWeight: '700',
-  fontFamily: WebTypography.displayFont,
-};
-
-const bottomNoteRowStyle = {
+const tagItemStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
 };
 
-const bottomNoteTextStyle = {
-  fontSize: '12px',
+const tagTextStyle = {
+  fontSize: '13px',
+  fontWeight: '600',
   color: WebColors.mutedSlate,
   fontFamily: WebTypography.bodyFont,
 };

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 import {
   Sparkles,
-  ArrowRight,
-  CheckCircle2,
   Lock,
   Mic,
   Car,
@@ -11,37 +9,18 @@ import {
   Utensils,
   TrendingUp,
   ShieldCheck,
+  Smartphone,
 } from 'lucide-react-native';
 import { WebColors, WebGradients, WebShadows, WebTypography } from '@/constants/web-tokens';
 
-interface LandingHeroProps {
-  onJoinWaitlist?: (email: string) => void;
-}
-
-export const LandingHero: React.FC<LandingHeroProps> = ({ onJoinWaitlist }) => {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!email || !email.includes('@')) return;
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      if (onJoinWaitlist) onJoinWaitlist(email);
-    }, 400);
-  };
-
+export const LandingHero: React.FC = () => {
   return (
-    <section style={heroSectionStyle as any} id="waitlist">
+    <section style={heroSectionStyle as any} id="overview">
       {/* Background Ambient Radial Sunset Glow */}
       <div style={ambientGlowStyle as any} />
 
       <div style={heroContainerStyle as any}>
-        {/* Left Column: Value Proposition & VIP Waitlist Form */}
+        {/* Left Column: Value Proposition & Store Badges */}
         <div style={leftColStyle as any}>
           {/* Kicker Badge */}
           <div style={kickerBadgeStyle as any}>
@@ -60,36 +39,34 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onJoinWaitlist }) => {
             Your finances aren't an intimidating math spreadsheet — they're a behavioral story. Looop diagnoses the habit loops behind your daily spending and turns micro-wins into fully funded dream vaults.
           </p>
 
-          {/* Waitlist Form Pill */}
-          <div style={formWrapperStyle as any}>
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} style={formCardStyle as any}>
-                <input
-                  type="email"
-                  placeholder="Enter your email for VIP early access..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={emailInputStyle as any}
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  style={submitBtnStyle as any}
-                >
-                  <span>{isSubmitting ? 'Joining...' : 'Claim VIP Access'}</span>
-                  <ArrowRight size={16} color="#FFFFFF" strokeWidth={2.4} />
-                </button>
-              </form>
-            ) : (
-              <div style={successBoxStyle as any}>
-                <CheckCircle2 size={20} color={WebColors.emerald} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={successTitleStyle as any}>You're on the VIP list!</span>
-                  <span style={successSubStyle as any}>Watch your inbox for priority access & beta invites.</span>
+          {/* Store Availability Badges */}
+          <div style={storeBadgesWrapperStyle as any}>
+            <div style={badgesRowStyle as any}>
+              {/* Apple App Store Badge */}
+              <div style={storeBadgeStyle as any}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#0F172A">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 0.92-2.87-.93.04-2.02.63-2.66 1.38-.56.65-1.06 1.71-.93 2.74 1.05.08 2.08-.54 2.67-1.25z" />
+                </svg>
+                <div style={badgeTextColStyle as any}>
+                  <span style={badgeSubtextStyle as any}>COMING SOON TO</span>
+                  <span style={badgeTitleStyle as any}>App Store</span>
                 </div>
               </div>
-            )}
+
+              {/* Google Play Store Badge */}
+              <div style={storeBadgeStyle as any}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186c-.36-.37-.61-.924-.61-1.613V3.427c0-.689.25-1.243.61-1.613z" fill="#00C3FF" />
+                  <path d="M17.204 8.587l-3.412 3.413 3.412 3.413 3.906-2.22c1.118-.636 1.118-1.75 0-2.386l-3.906-2.22z" fill="#FFD400" />
+                  <path d="M3.609 1.814l10.183 10.186 3.412-3.413-11.45-6.507c-.773-.44-1.605-.447-2.145-.266z" fill="#00E676" />
+                  <path d="M13.792 12L3.61 22.186c.54.18 1.372.174 2.144-.266l11.45-6.507-3.412-3.413z" fill="#FF334C" />
+                </svg>
+                <div style={badgeTextColStyle as any}>
+                  <span style={badgeSubtextStyle as any}>COMING SOON TO</span>
+                  <span style={badgeTitleStyle as any}>Google Play</span>
+                </div>
+              </div>
+            </div>
 
             {/* Privacy & Trust Badge */}
             <div style={trustRowStyle as any}>
@@ -104,8 +81,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({ onJoinWaitlist }) => {
               </div>
               <span style={{ color: WebColors.borderStrong }}>•</span>
               <div style={trustItemStyle as any}>
-                <Sparkles size={13} color={WebColors.primaryOrange} />
-                <span style={trustTextStyle as any}>iOS, Android & Web</span>
+                <Smartphone size={13} color={WebColors.primaryOrange} />
+                <span style={trustTextStyle as any}>Native iOS & Android</span>
               </div>
             </div>
           </div>
@@ -324,76 +301,53 @@ const heroSubtextStyle = {
   margin: '0 0 32px 0',
 };
 
-const formWrapperStyle = {
+const storeBadgesWrapperStyle = {
   width: '100%',
   maxWidth: '520px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
 };
 
-const formCardStyle = {
+const badgesRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '14px',
+  flexWrap: 'wrap',
+};
+
+const storeBadgeStyle = {
   backgroundColor: WebColors.cardWhite,
-  borderRadius: '999px',
-  padding: '6px',
-  paddingLeft: '20px',
-  display: 'flex',
-  alignItems: 'center',
-  border: `1.2px solid ${WebColors.borderCard}`,
-  boxShadow: WebShadows.cardRest,
-  marginBottom: '16px',
-};
-
-const emailInputStyle = {
-  flex: 1,
-  height: '46px',
-  fontSize: '15px',
-  color: WebColors.inkSlate,
-  fontFamily: WebTypography.bodyFont,
-  outline: 'none',
-  border: 'none',
-  backgroundColor: 'transparent',
-};
-
-const submitBtnStyle = {
-  background: WebGradients.primarySunset,
-  color: '#FFFFFF',
-  padding: '0 24px',
-  height: '46px',
-  borderRadius: '999px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  border: 'none',
-  fontSize: '15px',
-  fontWeight: '700',
-  fontFamily: WebTypography.displayFont,
-  letterSpacing: '-0.2px',
-  boxShadow: WebShadows.buttonPrimary,
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-};
-
-const successBoxStyle = {
-  backgroundColor: WebColors.emeraldSoft,
-  borderRadius: '18px',
-  padding: '16px 20px',
+  borderRadius: '16px',
+  padding: '10px 18px',
   display: 'flex',
   alignItems: 'center',
   gap: '12px',
-  border: `1.2px solid ${WebColors.emeraldBorder}`,
-  marginBottom: '16px',
+  border: `1.2px solid ${WebColors.borderCard}`,
+  boxShadow: WebShadows.cardRest,
+  cursor: 'default',
+  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
 };
 
-const successTitleStyle = {
-  color: WebColors.inkSlate,
-  fontSize: '15px',
-  fontWeight: '700',
+const badgeTextColStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+};
+
+const badgeSubtextStyle = {
+  fontSize: '9px',
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  color: WebColors.mutedSlate,
   fontFamily: WebTypography.displayFont,
 };
 
-const successSubStyle = {
-  color: WebColors.subSlate,
-  fontSize: '13px',
-  fontFamily: WebTypography.bodyFont,
+const badgeTitleStyle = {
+  fontSize: '15px',
+  fontWeight: '800',
+  color: WebColors.inkSlate,
+  fontFamily: WebTypography.displayFont,
+  letterSpacing: '-0.2px',
 };
 
 const trustRowStyle = {
@@ -401,7 +355,8 @@ const trustRowStyle = {
   alignItems: 'center',
   flexWrap: 'wrap',
   gap: '10px',
-  paddingLeft: '6px',
+  paddingLeft: '4px',
+  marginTop: '4px',
 };
 
 const trustItemStyle = {

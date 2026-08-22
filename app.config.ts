@@ -40,7 +40,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       package: getPackageName(),
       googleServicesFile: getGoogleServicesFile(),
       adaptiveIcon: {
-        backgroundColor: '#0F172A',
+        backgroundColor: '#FAF9F6',
         foregroundImage: './assets/appicons/logo.png',
       },
       predictiveBackGestureEnabled: false,
@@ -60,9 +60,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#ffffffff',
+          backgroundColor: '#FAF9F6',
           image: './assets/appicons/logo.png',
-          imageWidth: 100,
+          imageWidth: 120,
         },
       ],
       'expo-background-task',
