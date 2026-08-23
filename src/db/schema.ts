@@ -5,14 +5,13 @@ import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
  */
 export const transactions = sqliteTable('transactions', {
   id: text('id').primaryKey(),
-  title: text('title').notNull(),
   amount: real('amount').notNull(),
-  type: text('type', { enum: ['income', 'expense'] }).notNull().default('expense'),
   category: text('category').notNull(),
-  icon: text('icon').notNull().default('Wallet'),
-  timestamp: text('timestamp').notNull(),
   date: text('date').notNull(), // YYYY-MM-DD
+  timestamp: text('timestamp').notNull(),
+  description: text('description'),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 export type Transaction = typeof transactions.$inferSelect;

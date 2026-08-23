@@ -48,14 +48,13 @@ CREATE TABLE IF NOT EXISTS milestone_vaults (
 
 CREATE TABLE IF NOT EXISTS transactions (
 	id TEXT PRIMARY KEY NOT NULL,
-	title TEXT NOT NULL,
 	amount REAL NOT NULL,
-	type TEXT DEFAULT 'expense' NOT NULL,
 	category TEXT NOT NULL,
-	icon TEXT DEFAULT 'Wallet' NOT NULL,
-	timestamp TEXT NOT NULL,
 	date TEXT NOT NULL,
-	created_at TEXT NOT NULL
+	timestamp TEXT NOT NULL,
+	description TEXT,
+	created_at TEXT NOT NULL,
+	updated_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_settings (
@@ -90,7 +89,58 @@ export async function initializeDatabase(): Promise<boolean> {
     // Execute Schema creation
     await expoDb.execAsync(SCHEMA_SQL);
 
-    // Safe column migrations for existing SQLite tables
+    // Safe column migrations & table rebuilds for existing SQLite tables
+    try {
+      const txTableInfo = await expoDb.getAllAsync<{ name: string; notnull: number }>(
+        `PRAGMA table_info(transactions);`
+      );
+      const colNames = txTableInfo.map((c) => c.name);
+
+      // If transactions table has legacy 'title' column with NOT NULL or missing new columns
+      if (colNames.includes('title')) {
+        await expoDb.execAsync(`
+          PRAGMA foreign_keys=off;
+
+          CREATE TABLE IF NOT EXISTS transactions_new (
+            id TEXT PRIMARY KEY NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT NOT NULL,
+            date TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            description TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          );
+
+          INSERT OR REPLACE INTO transactions_new (id, amount, category, date, timestamp, description, created_at, updated_at)
+          SELECT 
+            id, 
+            amount, 
+            category, 
+            date, 
+            timestamp, 
+            COALESCE(description, title, category), 
+            created_at, 
+            COALESCE(created_at, date, datetime('now'))
+          FROM transactions;
+
+          DROP TABLE transactions;
+          ALTER TABLE transactions_new RENAME TO transactions;
+
+          PRAGMA foreign_keys=on;
+        `);
+      } else {
+        try {
+          await expoDb.execAsync(`ALTER TABLE transactions ADD COLUMN description TEXT;`);
+        } catch (_) {}
+        try {
+          await expoDb.execAsync(`ALTER TABLE transactions ADD COLUMN updated_at TEXT;`);
+        } catch (_) {}
+      }
+    } catch (migErr) {
+      console.warn('Transactions table migration note:', migErr);
+    }
+
     try {
       await expoDb.execAsync(`ALTER TABLE weekly_goals ADD COLUMN report_id TEXT;`);
     } catch (_) {}

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-nati
 import { Plus, Trash2, ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { AMOUNT_PRESETS, AMOUNT_INCREMENTS } from './expense-constants';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 interface KeypadGridProps {
   amount: string;
@@ -81,7 +82,7 @@ export const KeypadGrid: React.FC<KeypadGridProps> = React.memo(({
             onPress={() => handleIncrement(inc)}
             style={styles.incrementChip}
           >
-            <Plus size={11} color="#64748B" />
+            <Plus size={11} color={ThemeColors.textSecondary} />
             <Text style={styles.incrementChipText}>{currencySymbol}{inc}</Text>
           </TouchableOpacity>
         ))}
@@ -104,7 +105,7 @@ export const KeypadGrid: React.FC<KeypadGridProps> = React.memo(({
                 style={styles.keypadKey}
               >
                 {key === 'back' ? (
-                  <Trash2 size={18} color="#64748B" />
+                  <Trash2 size={18} color={ThemeColors.textSecondary} />
                 ) : (
                   <Text style={styles.keypadKeyText}>{key}</Text>
                 )}
@@ -140,26 +141,26 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   amountCurrencySymbol: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 28,
+    color: ThemeColors.primary,
     marginBottom: 4,
   },
   amountLargeText: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.extraBold,
+    fontSize: 38,
+    color: ThemeColors.textPrimary,
     letterSpacing: -1,
   },
   amountLargePlaceholder: {
-    color: '#CBD5E1',
+    color: ThemeColors.textMuted,
   },
   blinkingCursor: {
-    width: 2,
-    height: 30,
-    backgroundColor: '#7C3AED',
-    marginLeft: 2,
-    borderRadius: 1,
+    width: 2.5,
+    height: 32,
+    backgroundColor: ThemeColors.primary,
+    marginLeft: 3,
+    borderRadius: 1.5,
   },
   chipsScrollView: {
     marginVertical: 8,
@@ -174,36 +175,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   presetChipActive: {
-    backgroundColor: '#F3E8FF',
-    borderColor: '#7C3AED',
+    backgroundColor: ThemeColors.primarySoft,
+    borderColor: ThemeColors.primary,
   },
   presetChipText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 12,
-    fontWeight: '600',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   presetChipTextActive: {
-    color: '#7C3AED',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   incrementChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   incrementChipText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   keypadContainer: {
     gap: 6,
@@ -215,42 +218,42 @@ const styles = StyleSheet.create({
   },
   keypadKey: {
     flex: 1,
-    height: 44,
+    height: 46,
     borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
   keypadKeyText: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 20,
+    color: ThemeColors.textPrimary,
   },
   primaryCardBtn: {
-    height: 46,
+    height: 48,
     borderRadius: 14,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     marginTop: 4,
-    shadowColor: '#7C3AED',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.22,
     shadowRadius: 6,
     elevation: 3,
   },
   primaryCardBtnDisabled: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
     shadowOpacity: 0,
     elevation: 0,
   },
   primaryCardBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

@@ -4,28 +4,21 @@ import {
   Check,
   Plus,
   Sparkles,
-  Receipt,
-  ChevronDown,
   Edit3,
   CheckCircle2,
   Zap,
-  Cpu,
 } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
-import Dropdown from '@/shared/ui/organisms/dropdown';
 import type { CategoryItem, ParsedExpenseResult } from '@/lib/expense-nlp-parser';
-import { PAYMENT_METHODS } from './expense-constants';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 interface ReceiptSummaryCardProps {
   amount: string;
   selectedCategory: CategoryItem | null;
   time: string;
   reason: string;
-  paymentMethod: string;
   isSaved: boolean;
   parsedNLPResult: ParsedExpenseResult | null;
   currencySymbol?: string;
-  onPaymentMethodChange: (method: string) => void;
   onEditPress: () => void;
   onSavePress: () => void;
   onResetPress: () => void;
@@ -36,11 +29,9 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
   selectedCategory,
   time,
   reason,
-  paymentMethod,
   isSaved,
   parsedNLPResult,
   currencySymbol = '₹',
-  onPaymentMethodChange,
   onEditPress,
   onSavePress,
   onResetPress,
@@ -61,7 +52,7 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           onPress={onResetPress}
           style={styles.logAnotherBtn}
         >
-          <Plus size={16} color="#9333EA" />
+          <Plus size={16} color={ThemeColors.primary} />
           <Text style={styles.logAnotherBtnText}>Log Another Expense</Text>
         </TouchableOpacity>
       </View>
@@ -79,7 +70,7 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           <View
             style={[
               styles.receiptIconBadge,
-              { backgroundColor: selectedCategory?.bg || '#F3E8FF' },
+              { backgroundColor: selectedCategory?.bg || ThemeColors.primarySoft },
             ]}
           >
             {IconComp && (
@@ -101,19 +92,19 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           style={[
             styles.receiptStatusPill,
             isAIParsed
-              ? { backgroundColor: '#f3e8ff', borderColor: '#7c3aed' }
-              : { backgroundColor: '#fef3c7', borderColor: '#d97706' },
+              ? { backgroundColor: ThemeColors.violetSoft, borderColor: ThemeColors.violetBorder }
+              : { backgroundColor: ThemeColors.amberSoft, borderColor: ThemeColors.amberBorder },
           ]}
         >
           {isAIParsed ? (
-            <Sparkles size={12} color="#7c3aed" />
+            <Sparkles size={12} color={ThemeColors.violet} />
           ) : (
-            <Zap size={12} color="#d97706" />
+            <Zap size={12} color={ThemeColors.amber} />
           )}
           <Text
             style={[
               styles.receiptStatusText,
-              isAIParsed ? { color: '#7c3aed' } : { color: '#d97706' },
+              isAIParsed ? { color: ThemeColors.violet } : { color: ThemeColors.amber },
             ]}
           >
             {isAIParsed ? 'GEMINI AI' : 'LOCAL PARSER'}
@@ -148,61 +139,11 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           <Text style={styles.receiptMetaVal}>{time}</Text>
         </View>
 
-        <View style={styles.receiptMetaRow}>
+        <View style={[styles.receiptMetaRow, { borderBottomWidth: 0, paddingBottom: 2 }]}>
           <Text style={styles.receiptMetaLabel}>DESCRIPTION</Text>
-          <Text style={styles.receiptMetaVal} numberOfLines={1}>
+          <Text style={styles.receiptMetaVal} numberOfLines={2}>
             {reason || 'None provided'}
           </Text>
-        </View>
-
-        {/* Payment Mode with Interactive Dropdown */}
-        <View style={[styles.receiptMetaRow, { borderBottomWidth: 0, paddingBottom: 2 }]}>
-          <Text style={styles.receiptMetaLabel}>PAYMENT METHOD</Text>
-          <View style={styles.dropdownAnchorCol}>
-            <Dropdown>
-              <Dropdown.Trigger style={styles.dropdownTriggerWrapper}>
-                <View style={styles.paymentDropdownTrigger}>
-                  <Text style={styles.paymentDropdownText} numberOfLines={1}>
-                    {paymentMethod}
-                  </Text>
-                  <ChevronDown size={13} color="#9333EA" style={{ marginLeft: 6 }} />
-                </View>
-              </Dropdown.Trigger>
-
-              <Dropdown.Content position="auto" style={styles.paymentDropdownMenu}>
-                {PAYMENT_METHODS.map((pm) => {
-                  const IconC = pm.icon;
-                  const isSelected = paymentMethod === pm.label;
-                  return (
-                    <Dropdown.Item
-                      key={pm.id}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onPaymentMethodChange(pm.label);
-                      }}
-                      style={[
-                        styles.dropdownOptionItem,
-                        isSelected && styles.dropdownOptionItemSelected,
-                      ]}
-                    >
-                      <View style={styles.dropdownOptionLeft}>
-                        <IconC size={16} color={isSelected ? '#9333EA' : '#64748B'} />
-                        <Text
-                          style={[
-                            styles.dropdownOptionText,
-                            isSelected && styles.dropdownOptionTextSelected,
-                          ]}
-                        >
-                          {pm.label}
-                        </Text>
-                      </View>
-                      {isSelected && <Check size={14} color="#9333EA" strokeWidth={2.5} />}
-                    </Dropdown.Item>
-                  );
-                })}
-              </Dropdown.Content>
-            </Dropdown>
-          </View>
         </View>
       </View>
 
@@ -216,20 +157,20 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
         <View
           style={[
             styles.engineIconBox,
-            isAIParsed ? { backgroundColor: '#EDE9FE' } : { backgroundColor: '#FEF3C7' },
+            isAIParsed ? { backgroundColor: ThemeColors.violetSoft } : { backgroundColor: ThemeColors.amberSoft },
           ]}
         >
           {isAIParsed ? (
-            <Sparkles size={14} color="#7C3AED" />
+            <Sparkles size={14} color={ThemeColors.violet} />
           ) : (
-            <Zap size={14} color="#D97706" />
+            <Zap size={14} color={ThemeColors.amber} />
           )}
         </View>
         <View style={{ flex: 1 }}>
           <Text
             style={[
               styles.engineTitle,
-              isAIParsed ? { color: '#7C3AED' } : { color: '#D97706' },
+              isAIParsed ? { color: ThemeColors.violet } : { color: ThemeColors.amber },
             ]}
           >
             {isAIParsed
@@ -256,7 +197,7 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
           onPress={onEditPress}
           style={styles.editReceiptBtn}
         >
-          <Edit3 size={15} color="#475569" />
+          <Edit3 size={15} color={ThemeColors.textSecondary} />
           <Text style={styles.editReceiptBtnText}>Edit Details</Text>
         </TouchableOpacity>
 
@@ -274,42 +215,6 @@ export const ReceiptSummaryCard: React.FC<ReceiptSummaryCardProps> = React.memo(
 });
 
 const styles = StyleSheet.create({
-  engineProvenanceCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  engineProvenanceCardAi: {
-    backgroundColor: '#FAF5FF',
-    borderColor: '#E9D5FF',
-  },
-  engineProvenanceCardFallback: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
-  },
-  engineIconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  engineTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  engineSubtitle: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#64748B',
-    marginTop: 1,
-  },
   container: {
     width: '100%',
   },
@@ -321,25 +226,25 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
-    shadowColor: '#059669',
+    shadowColor: ThemeColors.emerald,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 6,
   },
   savedTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 24,
+    color: ThemeColors.textPrimary,
   },
   savedSubtitle: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 4,
     marginBottom: 20,
     textAlign: 'center',
@@ -351,14 +256,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 16,
-    backgroundColor: '#FAF5FF',
+    backgroundColor: ThemeColors.primarySoft,
     borderWidth: 1.5,
-    borderColor: '#E9D5FF',
+    borderColor: ThemeColors.primaryBorder,
   },
   logAnotherBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#9333EA',
+    color: ThemeColors.primary,
   },
   receiptTopHeader: {
     flexDirection: 'row',
@@ -380,14 +285,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   receiptStoreName: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 17,
+    color: ThemeColors.textPrimary,
   },
   receiptSubtitle: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   receiptStatusPill: {
@@ -400,8 +305,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   receiptStatusText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
     letterSpacing: 0.5,
   },
   receiptAmountHero: {
@@ -411,15 +316,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   receiptAmountSymbol: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#9333EA',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 26,
+    color: ThemeColors.primary,
     marginRight: 4,
   },
   receiptAmountDigits: {
-    fontSize: 38,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.black,
+    fontSize: 40,
+    color: ThemeColors.textPrimary,
     letterSpacing: -1,
   },
   receiptDividerRow: {
@@ -431,36 +336,36 @@ const styles = StyleSheet.create({
   receiptLeftNotch: {
     width: 14,
     height: 24,
-    backgroundColor: '#FAFAFC',
+    backgroundColor: ThemeColors.canvas,
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
     borderRightWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: ThemeColors.border,
   },
   receiptDashedLine: {
     flex: 1,
     height: 1,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: ThemeColors.border,
     borderStyle: 'dashed',
     marginHorizontal: 8,
   },
   receiptRightNotch: {
     width: 14,
     height: 24,
-    backgroundColor: '#FAFAFC',
+    backgroundColor: ThemeColors.canvas,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     borderLeftWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: ThemeColors.border,
   },
   receiptMetaTable: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 16,
     padding: 14,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   receiptMetaRow: {
     flexDirection: 'row',
@@ -468,86 +373,56 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#EEF2F6',
+    borderBottomColor: ThemeColors.borderSubtle,
   },
   receiptMetaLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   receiptMetaVal: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
-    maxWidth: '55%',
+    color: ThemeColors.textPrimary,
+    maxWidth: '65%',
     textAlign: 'right',
   },
-  dropdownAnchorCol: {
-    flex: 1,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  dropdownTriggerWrapper: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  paymentDropdownTrigger: {
+  engineProvenanceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FAF5FF',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-  },
-  paymentDropdownText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#9333EA',
-    textAlign: 'right',
-  },
-  paymentDropdownMenu: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 6,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
-    minWidth: 230,
-    zIndex: 9999,
-  },
-  dropdownOptionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 11,
+    gap: 10,
+    marginHorizontal: 4,
+    marginBottom: 12,
     paddingHorizontal: 12,
-    borderRadius: 10,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  dropdownOptionItemSelected: {
-    backgroundColor: '#FAF5FF',
+  engineProvenanceCardAi: {
+    backgroundColor: ThemeColors.violetSoft,
+    borderColor: ThemeColors.violetBorder,
   },
-  dropdownOptionLeft: {
-    flexDirection: 'row',
+  engineProvenanceCardFallback: {
+    backgroundColor: ThemeColors.amberSoft,
+    borderColor: ThemeColors.amberBorder,
+  },
+  engineIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
-    gap: 8,
-    flex: 1,
+    justifyContent: 'center',
   },
-  dropdownOptionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#475569',
+  engineTitle: {
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 11,
   },
-  dropdownOptionTextSelected: {
-    color: '#9333EA',
-    fontWeight: '700',
+  engineSubtitle: {
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 10.5,
+    color: ThemeColors.textSecondary,
+    marginTop: 1,
   },
   receiptBarcodeDecoration: {
     alignItems: 'center',
@@ -556,14 +431,14 @@ const styles = StyleSheet.create({
   barcodeLinesMock: {
     width: '60%',
     height: 18,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
     borderRadius: 4,
     opacity: 0.6,
   },
   receiptCodeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 1.2,
     marginTop: 4,
   },
@@ -579,15 +454,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 52,
+    height: 50,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   editReceiptBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   saveReceiptFinalBtn: {
     flex: 1,
@@ -595,18 +472,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 52,
+    height: 50,
     borderRadius: 16,
-    backgroundColor: '#059669',
-    shadowColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
+    shadowColor: ThemeColors.emerald,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 4,
   },
   saveReceiptFinalText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

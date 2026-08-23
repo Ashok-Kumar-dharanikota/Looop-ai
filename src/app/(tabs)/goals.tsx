@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GoalsTab } from '@/components/tabs/GoalsTab';
+import { ThemeColors } from '@/constants/theme';
 
 export default function GoalsScreen() {
   return (
@@ -15,6 +16,7 @@ export default function GoalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFC',
+    backgroundColor: ThemeColors.canvas,
   },
 });
+

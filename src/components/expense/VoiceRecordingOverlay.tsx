@@ -27,6 +27,7 @@ import {
   Check,
 } from 'lucide-react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 interface VoiceRecordingOverlayProps {
   insets: EdgeInsets;
@@ -101,12 +102,12 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = React
 
   const animatedWave1 = useAnimatedStyle(() => ({
     transform: [{ scale: waveScale1.value }],
-    opacity: isListening ? 0.35 : 0,
+    opacity: isListening ? 0.45 : 0,
   }));
 
   const animatedWave2 = useAnimatedStyle(() => ({
     transform: [{ scale: waveScale2.value }],
-    opacity: isListening ? 0.2 : 0,
+    opacity: isListening ? 0.25 : 0,
   }));
 
   const animatedBar1 = useAnimatedStyle(() => ({ height: barHeight1.value }));
@@ -124,7 +125,7 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = React
       {/* Header */}
       <View style={styles.audioModeHeader}>
         <View style={styles.audioBadgePill}>
-          <Sparkles size={13} color="#9333EA" />
+          <Sparkles size={13} color={ThemeColors.primary} />
           <Text style={styles.audioBadgeText}>VOICE EXPENSE INPUT</Text>
         </View>
 
@@ -133,7 +134,7 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = React
           onPress={onAbort}
           style={styles.audioCloseBtn}
         >
-          <X size={20} color="#0F172A" />
+          <X size={20} color={ThemeColors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -215,7 +216,7 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = React
               })
             ) : (
               <Text style={styles.transcriptPlaceholder}>
-                e.g. &quot;Paid ₹450 for lunch at Subway via UPI&quot; or &quot;300 uber cab&quot;
+                e.g. &quot;Paid ₹450 for lunch with friends&quot; or &quot;300 uber ride&quot;
               </Text>
             )}
           </View>
@@ -229,7 +230,7 @@ export const VoiceRecordingOverlay: React.FC<VoiceRecordingOverlayProps> = React
           onPress={onStartRecording}
           style={styles.audioRetryBtn}
         >
-          <RotateCcw size={16} color="#64748B" />
+          <RotateCcw size={16} color={ThemeColors.textSecondary} />
           <Text style={styles.audioRetryBtnText}>Re-record</Text>
         </TouchableOpacity>
 
@@ -266,23 +267,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: ThemeColors.primarySoft,
     borderWidth: 1,
-    borderColor: 'rgba(147, 51, 234, 0.2)',
+    borderColor: ThemeColors.primaryBorder,
   },
   audioBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#9333EA',
+    color: ThemeColors.primary,
     letterSpacing: 0.8,
   },
   audioCloseBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: ThemeColors.card,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
@@ -299,31 +302,31 @@ const styles = StyleSheet.create({
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: '#E9D5FF',
+    backgroundColor: '#FFEDD5',
   },
   audioPulseRingInner: {
     position: 'absolute',
     width: 104,
     height: 104,
     borderRadius: 52,
-    backgroundColor: '#C084FC',
+    backgroundColor: '#FED7AA',
   },
   audioMicCircle: {
     width: 76,
     height: 76,
     borderRadius: 38,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#9333EA',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 14,
     elevation: 8,
   },
   audioMicCircleFinished: {
-    backgroundColor: '#059669',
-    shadowColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
+    shadowColor: ThemeColors.emerald,
   },
   waveformBarsRow: {
     flexDirection: 'row',
@@ -336,12 +339,12 @@ const styles = StyleSheet.create({
   waveBar: {
     width: 5,
     borderRadius: 3,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
   },
   audioListeningStatus: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     marginTop: 10,
   },
   speechErrorBox: {
@@ -355,16 +358,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   speechErrorText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 12,
-    fontWeight: '600',
     color: '#EF4444',
   },
   audioTranscriptCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -378,9 +381,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   transcriptCardLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.8,
   },
   liveRecordingDotRow: {
@@ -395,8 +398,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   liveRecordingText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
     color: '#EF4444',
   },
   wordsWrapContainer: {
@@ -404,21 +407,21 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   transcriptWord: {
+    fontFamily: AppFonts.jakarta.medium,
     fontSize: 15,
     lineHeight: 22,
   },
   transcriptWordSpoken: {
-    color: '#0F172A',
-    fontWeight: '600',
+    color: ThemeColors.textPrimary,
   },
   transcriptWordCurrent: {
-    color: '#9333EA',
-    fontWeight: '800',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   transcriptPlaceholder: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     fontStyle: 'italic',
     lineHeight: 20,
   },
@@ -432,15 +435,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 52,
+    height: 50,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   audioRetryBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   audioConfirmPrimaryBtn: {
     flex: 1,
@@ -448,18 +453,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 52,
+    height: 50,
     borderRadius: 16,
-    backgroundColor: '#9333EA',
-    shadowColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
   audioConfirmPrimaryBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
 });

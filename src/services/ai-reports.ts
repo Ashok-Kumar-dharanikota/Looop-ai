@@ -150,9 +150,9 @@ export interface DetectedSpendingPattern {
 }
 
 export function detectSpendingPatterns(
-  txList: Array<{ title: string; amount: number; category: string; type: string }>
+  txList: Array<{ title?: string; description?: string | null; amount: number; category: string }>
 ): DetectedSpendingPattern[] {
-  const expenseTxs = txList.filter((t) => t.type === 'expense');
+  const expenseTxs = txList;
   if (expenseTxs.length === 0) return [];
 
   const itemMap: Record<
@@ -166,7 +166,7 @@ export function detectSpendingPatterns(
   > = {};
 
   expenseTxs.forEach((t) => {
-    const rawTitle = (t.title || '').trim();
+    const rawTitle = ((t.description || t.title || t.category) || '').trim();
     if (!rawTitle) return;
 
     let normalized = rawTitle;
@@ -437,15 +437,11 @@ export async function generateAndSaveAIReport(
     const detectedPatterns = detectSpendingPatterns(txList);
 
     // Summarize transactions
-    const totalSpent = txList
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const totalSpent = txList.reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
     const categoryBreakdown: Record<string, number> = {};
     txList.forEach((t) => {
-      if (t.type === 'expense') {
-        categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + Math.abs(t.amount);
-      }
+      categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + Math.abs(t.amount);
     });
 
     let topCategory = 'Food & Dining';
@@ -494,7 +490,7 @@ export async function generateAndSaveAIReport(
       activeVaultTarget: activeVault?.targetAmount || 50000,
       activeVaultCurrent: activeVault?.currentAmount || 0,
       recentExpenses: txList.slice(0, 12).map((t) => ({
-        title: t.title,
+        title: t.description || t.category,
         amount: t.amount,
         category: t.category,
         date: t.date,

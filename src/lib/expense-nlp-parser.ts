@@ -13,9 +13,10 @@ export interface ParsedExpenseResult {
   amountFormatted: string;
   category: CategoryItem | null;
   categoryName: string;
-  merchant: string;
-  reason: string;
-  paymentMethod: string;
+  description: string;
+  merchant?: string;
+  reason?: string;
+  paymentMethod?: string;
   timeLabel: string;
   timeStr: string; // e.g. "6:52 PM"
   dateStr: string; // YYYY-MM-DD
@@ -24,7 +25,7 @@ export interface ParsedExpenseResult {
   isOnlyNumber: boolean;
   isAIParsed?: boolean;
   aiModelUsed?: string;
-  missingFields?: ('amount' | 'category' | 'merchant' | 'reason')[];
+  missingFields?: ('amount' | 'category' | 'merchant' | 'reason' | 'description')[];
   followupQuestion?: string | null;
 }
 
@@ -324,6 +325,7 @@ export function parseExpenseText(
       amountFormatted: '0',
       category: null,
       categoryName: 'General',
+      description: 'Expense',
       merchant: 'Expense',
       reason: 'Expense',
       paymentMethod: 'UPI (GPay / PhonePe)',
@@ -333,7 +335,7 @@ export function parseExpenseText(
       timestamp: now.toISOString(),
       confidence: 0,
       isOnlyNumber: false,
-      missingFields: ['amount', 'category', 'merchant'],
+      missingFields: ['amount', 'category', 'description'],
       followupQuestion: 'How much did you spend, and what was it for?',
     };
   }
@@ -355,9 +357,10 @@ export function parseExpenseText(
 
   // 5. Extract clean Merchant & Reason
   const { merchant, reason } = extractMerchantAndReason(trimmed, matchedStr, paymentKeyword, category);
+  const finalDescription = (reason || merchant || (category ? category.name : '')).trim();
 
   // Identify missing fields & determine targeted followup question
-  const missingFields: ('amount' | 'category' | 'merchant' | 'reason')[] = [];
+  const missingFields: ('amount' | 'category' | 'description')[] = [];
   let followupQuestion: string | null = null;
 
   if (amount === null || amount <= 0) {
@@ -370,14 +373,10 @@ export function parseExpenseText(
       followupQuestion = 'Which category best describes this expense?';
     }
   }
-  if (!merchant || merchant === 'Expense' || merchant === 'Unknown') {
-    missingFields.push('merchant');
+  if (!finalDescription) {
+    missingFields.push('description');
     if (!followupQuestion) {
-      if (reason && reason !== 'Expense') {
-        followupQuestion = `Where did you buy the ${reason.toLowerCase()} from?`;
-      } else {
-        followupQuestion = 'Where did you make this purchase?';
-      }
+      followupQuestion = 'What was this expense for?';
     }
   }
 
@@ -385,7 +384,6 @@ export function parseExpenseText(
   let confidence = 0.2;
   if (amount !== null && amount > 0) confidence += 0.4;
   if (category !== null) confidence += 0.25;
-  if (merchant && merchant !== 'Expense' && merchant !== 'Unknown') confidence += 0.15;
 
   return {
     rawText: trimmed,
@@ -393,6 +391,7 @@ export function parseExpenseText(
     amountFormatted: amount !== null ? amount.toLocaleString('en-IN') : '0',
     category,
     categoryName: category ? category.name : 'Food & Dining',
+    description: finalDescription,
     merchant,
     reason,
     paymentMethod,

@@ -1,5 +1,6 @@
 import { ProfileTab } from '@/components/tabs/ProfileTab';
 import { ScrollView, StyleSheet } from 'react-native';
+import { ThemeColors } from '@/constants/theme';
 
 export default function ProfileScreen() {
   return (
@@ -15,6 +16,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.canvas,
   },
 });
+

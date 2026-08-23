@@ -10,20 +10,10 @@ import {
   type ParsedExpenseResult,
 } from '@/lib/expense-nlp-parser';
 
-export const PAYMENT_METHODS_LIST = [
-  'UPI (GPay / PhonePe)',
-  'Credit Card',
-  'Debit Card',
-  'Cash',
-  'Net Banking',
-];
-
 export interface AIExpenseResponseJSON {
   amount: number;
   categoryName: string;
-  merchant: string;
-  reason: string;
-  paymentMethod: string;
+  description: string;
   dateStr: string;
   timeStr: string;
   timestamp: string;
@@ -149,37 +139,30 @@ function createExpenseResponseSchema(categoryNames: string[]): Schema {
   return Schema.object({
     properties: {
       amount: Schema.number({
-        description: 'Monetary amount spent as a positive number (e.g. 450, 20). If unknown or not mentioned, return 0.',
+        description: 'Monetary amount spent as a positive number (e.g. 50, 450). If unknown or not mentioned, return 0.',
       }),
       categoryName: Schema.enumString({
         enum: categoryNames,
         description: 'Best matching category from provided list.',
       }),
-      merchant: Schema.string({
-        description: 'Specific brand, store, vendor, bakery, restaurant, or service name (e.g. "Theobroma", "Subway", "Uber"). If NOT mentioned in text, return "Unknown".',
-      }),
-      reason: Schema.string({
-        description: 'Short note of what was purchased (e.g. "Eating cake", "Lunch", "Coffee").',
-      }),
-      paymentMethod: Schema.enumString({
-        enum: PAYMENT_METHODS_LIST,
-        description: 'Payment method used.',
+      description: Schema.string({
+        description: 'Clear, informative description or reason for the expense (e.g. "Tea with roommate and brother", "Coffee with friends", "Uber ride to office", "Groceries").',
       }),
       dateStr: Schema.string({
-        description: 'Transaction date in YYYY-MM-DD format (e.g. "2026-08-19").',
+        description: 'Transaction date in YYYY-MM-DD format (e.g. "2026-08-22").',
       }),
       timeStr: Schema.string({
-        description: 'Clean 12-hour transaction time with AM/PM (e.g. "6:52 PM" or "1:30 PM"). Never include words like "Evening" or parentheses.',
+        description: 'Clean 12-hour transaction time with AM/PM (e.g. "5:01 PM"). Never include words like "Evening" or parentheses.',
       }),
       timestamp: Schema.string({
-        description: 'Combined full ISO-8601 timestamp string (e.g. "2026-08-19T18:52:00.000Z").',
+        description: 'Combined full ISO-8601 timestamp string (e.g. "2026-08-22T17:01:34.727Z").',
       }),
       missingFields: Schema.array({
         items: Schema.string(),
-        description: 'List of fields missing or unknown in input (e.g. ["merchant"] if merchant was not specified, ["amount"] if amount was 0).',
+        description: 'List of essential fields missing or 0 in input (e.g. ["amount"] if amount was 0). Do NOT flag merchant, vendor, or payment mode.',
       }),
       followupQuestion: Schema.string({
-        description: 'Targeted, polite followup question to ask the user to clarify any missing/unknown fields (e.g. "Which bakery or shop did you buy the cake from?"). Return empty string "" if everything is known.',
+        description: 'Targeted, friendly followup question if amount is missing (e.g. "How much did you spend?"). Return empty string "" if amount is provided.',
       }),
     },
     optionalProperties: [],
@@ -199,22 +182,19 @@ function buildSystemInstruction(
   const currentFullISO = now.toISOString();
   const categoryNames = categories.map((c) => c.name).join(', ');
 
-  let prompt = `You are a financial transaction extraction AI. Extract structured JSON matching the provided schema.
+  let prompt = `You are an intelligent expense recording assistant. Extract structured JSON matching the provided schema.
 Current Context: Date=${currentISO}, Time=${currentTime}, Full Timestamp=${currentFullISO}, Timezone=Local.
 Valid Categories: [${categoryNames}]
-Valid PaymentMethods: [${PAYMENT_METHODS_LIST.join(', ')}]
 
 Rules:
-1. amount: Positive number. Parse shorthand ('1.5k' -> 1500, '20 rs' -> 20). If amount is omitted, return 0.
+1. amount: Positive number. Parse shorthand ('1.5k' -> 1500, '50 rs' -> 50, '20' -> 20). If amount is omitted, return 0.
 2. categoryName: Best match from Valid Categories.
-3. merchant: Specific shop, restaurant, app, brand, or vendor name. If user did NOT state where they bought it (e.g. "spent 20 on eating cake" does not specify the shop), return "Unknown".
-4. reason: Item or service purchased (e.g. "Eating cake", "Lunch", "Cab ride").
-5. paymentMethod: Match UPI/Credit Card/Debit Card/Cash/Net Banking. Default to 'UPI (GPay / PhonePe)'.
-6. dateStr: YYYY-MM-DD.
-7. timeStr: Clean 12-hour time format with AM/PM (e.g. "${currentTime}"). Do NOT format as "Evening (6:52 PM)".
-8. timestamp: Full combined ISO-8601 string (e.g. "${currentFullISO}").
-9. missingFields: List any fields that are missing, 0, or unknown (from ['amount', 'merchant', 'category', 'reason']). If merchant is "Unknown", include "merchant". If amount is 0, include "amount".
-10. followupQuestion: If missingFields is not empty, write a natural, friendly question to ask the user for the missing detail (e.g. if user ate cake but didn't say where: "Which bakery or shop did you get the cake from?", if amount missing: "How much did you spend?"). If all fields are known, return "".`;
+3. description: Capture a clean, natural description of what was spent on (e.g. "Tea with roommate and brother", "Coffee with team", "Dinner", "Uber ride"). Do not separate into merchant or payment mode.
+4. dateStr: YYYY-MM-DD format (default to '${currentISO}' unless user specifies yesterday or another date).
+5. timeStr: Clean 12-hour time format with AM/PM (e.g. "${currentTime}"). Do NOT format as "Evening (6:52 PM)".
+6. timestamp: Full combined ISO-8601 string (e.g. "${currentFullISO}").
+7. missingFields: Only list ['amount'] if amount is missing or 0, or ['category'] if category cannot be resolved. Do NOT flag merchant, vendor, or payment mode as missing.
+8. followupQuestion: If amount is 0 or missing, ask a friendly question like "How much did you spend on this?". If amount is provided, return "".`;
 
   if (contextOptions?.recentExpensesSummary) {
     prompt += `\nRecentExpenses: ${contextOptions.recentExpensesSummary}`;
@@ -317,20 +297,13 @@ export async function parseExpenseWithFirebaseAI(
 
     const amountFormatted = amountVal !== null ? amountVal.toLocaleString('en-IN') : '0';
 
-    // Check missing / unknown fields
-    const missingFields: ('amount' | 'category' | 'merchant' | 'reason')[] = [];
+    // Check essential missing fields (only amount or category)
+    const missingFields: ('amount' | 'category' | 'description')[] = [];
     if (amountVal === null || amountVal <= 0) {
       missingFields.push('amount');
     }
     if (!matchedCategory) {
       missingFields.push('category');
-    }
-    const isUnknownMerchant =
-      !parsedJson.merchant ||
-      parsedJson.merchant.toLowerCase() === 'unknown' ||
-      parsedJson.merchant.trim() === '';
-    if (isUnknownMerchant) {
-      missingFields.push('merchant');
     }
 
     let followupQuestion =
@@ -338,13 +311,8 @@ export async function parseExpenseWithFirebaseAI(
         ? parsedJson.followupQuestion.trim()
         : null;
 
-    if (!followupQuestion && missingFields.length > 0) {
-      if (missingFields.includes('amount')) {
-        followupQuestion = 'How much did you spend on this?';
-      } else if (missingFields.includes('merchant')) {
-        const itemReason = parsedJson.reason || 'this';
-        followupQuestion = `Which bakery, shop, or place did you buy ${itemReason.toLowerCase()} from?`;
-      }
+    if (!followupQuestion && missingFields.includes('amount')) {
+      followupQuestion = 'How much did you spend on this?';
     }
 
     // Clean combined timestamp and timeLabel
@@ -358,9 +326,7 @@ export async function parseExpenseWithFirebaseAI(
     const isToday = finalDateStr === now.toISOString().split('T')[0];
     const timeLabel = `${isToday ? 'Today' : finalDateStr}, ${cleanTimeStr}`;
     const combinedTimestamp = parsedJson.timestamp || now.toISOString();
-
-    const cleanMerchant = isUnknownMerchant ? '' : parsedJson.merchant;
-    const cleanReason = parsedJson.reason || cleanMerchant || matchedCategory.name;
+    const finalDescription = (parsedJson.description || matchedCategory.name || 'Expense').trim();
 
     return {
       rawText: trimmed,
@@ -368,9 +334,7 @@ export async function parseExpenseWithFirebaseAI(
       amountFormatted,
       category: matchedCategory,
       categoryName: matchedCategory ? matchedCategory.name : 'Food & Dining',
-      merchant: cleanMerchant,
-      reason: cleanReason,
-      paymentMethod: parsedJson.paymentMethod || 'UPI (GPay / PhonePe)',
+      description: finalDescription,
       timeLabel,
       timeStr: cleanTimeStr,
       dateStr: finalDateStr,

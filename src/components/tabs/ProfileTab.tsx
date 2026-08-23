@@ -43,6 +43,7 @@ import { restorePurchases, presentCustomerCenterModal } from '@/services/purchas
 import { FinancialProfileModal } from '@/components/profile/FinancialProfileModal';
 import { SecuritySettingsModal } from '@/components/profile/SecuritySettingsModal';
 import { NotificationsSettingsModal } from '@/components/profile/NotificationsSettingsModal';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 export const ProfileTab: React.FC = () => {
   const router = useRouter();
@@ -149,85 +150,83 @@ export const ProfileTab: React.FC = () => {
 
   const handleExportCSV = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const txList = transactions || [];
-
-    if (txList.length === 0) {
-      Alert.alert('No Transactions Found', 'You do not have any recorded transactions to export yet.');
-      return;
-    }
-
-    const headers = ['ID', 'Date', 'Title', 'Category', 'Amount', 'Type', 'Time', 'Created At'];
-    const rows = txList.map((t) => [
-      `"${t.id}"`,
-      `"${t.date || ''}"`,
-      `"${(t.title || '').replace(/"/g, '""')}"`,
-      `"${(t.category || '').replace(/"/g, '""')}"`,
-      t.amount,
-      `"${t.type}"`,
-      `"${(t.timestamp || '').replace(/"/g, '""')}"`,
-      `"${t.createdAt || ''}"`,
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-
     try {
+      const txs = transactions || [];
+      if (txs.length === 0) {
+        Alert.alert('No Transactions', 'There are no transactions to export.');
+        return;
+      }
+
+      const headers = 'ID,Date,Timestamp,Category,Amount,Description,CreatedAt,UpdatedAt\n';
+      const rows = txs
+        .map((t) =>
+          `"${t.id}","${t.date}","${t.timestamp}","${t.category}",${t.amount},"${(t.description || '').replace(/"/g, '""')}","${t.createdAt}","${t.updatedAt}"`
+        )
+        .join('\n');
+
+      const csvContent = headers + rows;
       await Share.share({
-        title: 'Looop_Transactions.csv',
         message: csvContent,
+        title: `Looop_Transactions_${new Date().toISOString().slice(0, 10)}.csv`,
       });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
-      console.warn('Share error:', err);
+      Alert.alert('Export Notice', err?.message || 'Unable to export CSV file.');
     }
+  };
+
+  const handleResetData = () => {
+    Alert.alert(
+      'Reset All Local Data',
+      'This will erase all recorded transactions, goals, and local settings from this device. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset All Data',
+          style: 'destructive',
+          onPress: async () => {
+            await clearAllUserData();
+            queryClient.clear();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            Alert.alert('Data Reset', 'All local expense and goal data has been cleared.');
+          },
+        },
+      ]
+    );
   };
 
   const handleRateApp = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      if (await StoreReview.isAvailableAsync()) {
+      if (await StoreReview.hasAction()) {
         await StoreReview.requestReview();
       } else {
-        Alert.alert('Thank You!', 'We appreciate your support using Looop.');
+        Alert.alert('Thank You! ⭐', 'We love having you as a mindful spender with Looop!');
       }
-    } catch (err) {
-      console.warn('Store review notice:', err);
+    } catch {
+      Alert.alert('Thank You! ⭐', 'We love having you as a mindful spender with Looop!');
     }
   };
 
-  const displayName =
-    fbUser?.displayName || storeUser?.displayName || (isGuestUser ? 'Guest Account' : 'Looop User');
-  const userSubtext =
-    fbUser?.email || storeUser?.email || (isGuestUser ? 'Guest Mode • Data saved locally' : 'Google Account');
-  const photoURL = fbUser?.photoURL || storeUser?.photoURL || null;
-  const avatarLetter = (displayName ? displayName.charAt(0) : 'G').toUpperCase();
+  const activeUser = fbUser || storeUser;
+  const displayName = activeUser?.displayName || (isGuestUser ? 'Guest Explorer' : 'Mindful Spender');
+  const email = activeUser?.email || (isGuestUser ? 'Guest Mode (Local Only)' : null);
+  const avatarLetter = (displayName ? displayName.charAt(0) : 'U').toUpperCase();
+  const photoURL = activeUser?.photoURL || null;
 
-  const biometricBadgeText =
-    isPremium && biometricsEnabled
-      ? 'Active'
-      : isPremium
-      ? 'Off'
-      : 'Pro';
+  const biometricBadgeText = !isPremium
+    ? 'Pro Only'
+    : biometricsEnabled
+    ? biometricType === 'face'
+      ? 'Face ID'
+      : 'Active'
+    : 'Off';
+
+  const userSubtext = isGuestUser
+    ? 'Guest Explorer • Stored securely on device'
+    : email || 'Connected with Google • Cloud Sync Active';
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      {/* Financial Profile Modal */}
-      <FinancialProfileModal
-        visible={showFinancialModal}
-        onClose={() => setShowFinancialModal(false)}
-      />
-
-      {/* Security & Fingerprint Settings Modal */}
-      <SecuritySettingsModal
-        visible={showSecurityModal}
-        onClose={() => setShowSecurityModal(false)}
-      />
-
-      {/* Notifications Settings Modal */}
-      <NotificationsSettingsModal
-        visible={showNotificationsModal}
-        onClose={() => setShowNotificationsModal(false)}
-      />
-
       {/* User Header */}
       <View style={styles.userHeader}>
         {photoURL ? (
@@ -289,13 +288,13 @@ export const ProfileTab: React.FC = () => {
       {!isPremium && !isGuestUser && (
         <TouchableOpacity activeOpacity={0.85} onPress={() => router.push('/paywall' as any)}>
           <LinearGradient
-            colors={['#7C3AED', '#9333EA']}
+            colors={['#FF6B00', '#EA580C']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.proBanner}
           >
             <View style={styles.proIconBox}>
-              <Crown size={20} color="#FBBF24" />
+              <Crown size={20} color="#FFFFFF" />
             </View>
             <View style={styles.signInContent}>
               <Text style={styles.proBannerTitle}>Upgrade to Looop Pro</Text>
@@ -319,14 +318,14 @@ export const ProfileTab: React.FC = () => {
               setShowFinancialModal(true);
             }}
           >
-            <View style={[styles.iconContainer, { backgroundColor: '#F3E8FF' }]}>
-              <Target size={20} color="#7C3AED" />
+            <View style={[styles.iconContainer, { backgroundColor: '#FFF7ED' }]}>
+              <Target size={20} color={ThemeColors.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.menuItemText}>Financial Profile & Goals</Text>
               <Text style={styles.menuItemSubtext}>Income, savings target & currency ({currencySymbol})</Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -340,19 +339,19 @@ export const ProfileTab: React.FC = () => {
               setShowSecurityModal(true);
             }}
           >
-            <View style={[styles.iconContainer, { backgroundColor: '#EDE9FE' }]}>
-              <Fingerprint size={20} color="#7C3AED" />
+            <View style={[styles.iconContainer, { backgroundColor: '#ECFDF5' }]}>
+              <Fingerprint size={20} color={ThemeColors.emerald} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.menuItemText}>Security & Fingerprint</Text>
-              <Text style={styles.menuItemSubtext}>App lock & fingerprint security</Text>
+              <Text style={styles.menuItemSubtext}>App lock & biometric protection</Text>
             </View>
             <View style={[styles.badgePill, isPremium && biometricsEnabled ? styles.badgePillActive : styles.badgePillMuted]}>
               <Text style={[styles.badgePillText, isPremium && biometricsEnabled ? styles.badgePillTextActive : styles.badgePillTextMuted]}>
                 {biometricBadgeText}
               </Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -378,7 +377,7 @@ export const ProfileTab: React.FC = () => {
                 {notificationsEnabled ? dailyReminderTime : 'Off'}
               </Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
         </View>
       </View>
@@ -387,7 +386,6 @@ export const ProfileTab: React.FC = () => {
         <Text style={styles.menuTitle}>DATA & SUPPORT</Text>
 
         <View style={styles.menuCard}>
-          {/* RevenueCat Customer Center (if Pro) or Upgrade option */}
           {isPremium ? (
             <>
               <TouchableOpacity
@@ -405,7 +403,7 @@ export const ProfileTab: React.FC = () => {
                   <Text style={styles.menuItemText}>Manage Subscription</Text>
                   <Text style={styles.menuItemSubtext}>Customer Center, plan details & billing</Text>
                 </View>
-                <ChevronRight size={16} color="#94A3B8" />
+                <ChevronRight size={16} color={ThemeColors.textMuted} />
               </TouchableOpacity>
 
               <View style={styles.divider} />
@@ -417,39 +415,37 @@ export const ProfileTab: React.FC = () => {
                 activeOpacity={0.7}
                 onPress={handleRestorePurchases}
               >
-                <View style={[styles.iconContainer, { backgroundColor: '#F3E8FF' }]}>
-                  <RotateCcw size={20} color="#7C3AED" />
+                <View style={[styles.iconContainer, { backgroundColor: '#FFF7ED' }]}>
+                  <RotateCcw size={20} color={ThemeColors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.menuItemText}>Restore Purchases</Text>
                   <Text style={styles.menuItemSubtext}>Restore previous Google Play purchases</Text>
                 </View>
-                <ChevronRight size={16} color="#94A3B8" />
+                <ChevronRight size={16} color={ThemeColors.textMuted} />
               </TouchableOpacity>
 
               <View style={styles.divider} />
             </>
           )}
 
-          {/* Real CSV Export */}
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={handleExportCSV}
           >
-            <View style={[styles.iconContainer, { backgroundColor: '#F1F5F9' }]}>
-              <Download size={20} color="#0F172A" />
+            <View style={[styles.iconContainer, { backgroundColor: ThemeColors.surface }]}>
+              <Download size={20} color={ThemeColors.textPrimary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.menuItemText}>Export Expense Data (CSV)</Text>
               <Text style={styles.menuItemSubtext}>Share or backup your records</Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
-          {/* Rate Looop App */}
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
@@ -459,75 +455,72 @@ export const ProfileTab: React.FC = () => {
               <Star size={20} color="#D97706" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuItemText}>Rate Looop</Text>
-              <Text style={styles.menuItemSubtext}>Support us with a review</Text>
+              <Text style={styles.menuItemText}>Rate Looop on App Store</Text>
+              <Text style={styles.menuItemSubtext}>Support mindful financial building</Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
-          {/* Privacy Policy */}
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
             onPress={() => router.push('/privacy-policy' as any)}
           >
-            <View style={[styles.iconContainer, { backgroundColor: '#F3E8FF' }]}>
-              <ShieldCheck size={20} color="#7C3AED" />
+            <View style={[styles.iconContainer, { backgroundColor: ThemeColors.surface }]}>
+              <ShieldCheck size={20} color={ThemeColors.textSecondary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuItemText}>Privacy Policy</Text>
-              <Text style={styles.menuItemSubtext}>Local-first data commitment</Text>
+              <Text style={styles.menuItemText}>Privacy Policy & Terms</Text>
+              <Text style={styles.menuItemSubtext}>Local-first data guarantee & terms</Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          {/* Terms of Use */}
-          <TouchableOpacity
-            style={styles.menuItem}
-            activeOpacity={0.7}
-            onPress={() => router.push('/terms-of-use' as any)}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: '#F1F5F9' }]}>
-              <FileText size={20} color="#475569" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.menuItemText}>Terms of Use</Text>
-              <Text style={styles.menuItemSubtext}>User agreement & conditions</Text>
-            </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Account Section */}
       <View style={styles.menuSection}>
-        <Text style={styles.menuTitle}>ACCOUNT</Text>
+        <Text style={styles.menuTitle}>ACCOUNT ACTIONS</Text>
 
         <View style={styles.menuCard}>
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={handleSignOut}
+            onPress={handleResetData}
           >
-            <View style={[styles.iconContainer, { backgroundColor: '#F1F5F9' }]}>
-              <LogOut size={20} color="#475569" />
+            <View style={[styles.iconContainer, { backgroundColor: '#FFF7ED' }]}>
+              <RotateCcw size={20} color={ThemeColors.primary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.menuItemText}>
-                {isGuestUser ? 'Exit Guest Mode' : 'Sign Out'}
-              </Text>
-              <Text style={styles.menuItemSubtext}>
-                {isGuestUser ? 'Switch account or sign in' : 'Log out of this device'}
-              </Text>
+              <Text style={styles.menuItemText}>Reset Local Expense Data</Text>
+              <Text style={styles.menuItemSubtext}>Clear local transactions & goals</Text>
             </View>
-            <ChevronRight size={16} color="#94A3B8" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
 
           <View style={styles.divider} />
+
+          {isAuthenticated && (
+            <>
+              <TouchableOpacity
+                style={styles.menuItem}
+                activeOpacity={0.7}
+                onPress={handleSignOut}
+              >
+                <View style={[styles.iconContainer, { backgroundColor: '#F1F5F9' }]}>
+                  <LogOut size={20} color={ThemeColors.textSecondary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.menuItemText}>Sign Out</Text>
+                  <Text style={styles.menuItemSubtext}>Disconnect account from this device</Text>
+                </View>
+                <ChevronRight size={16} color={ThemeColors.textMuted} />
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+            </>
+          )}
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -538,19 +531,29 @@ export const ProfileTab: React.FC = () => {
               <Trash2 size={20} color="#EF4444" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.menuItemText, { color: '#EF4444' }]}>
-                {isGuestUser ? 'Clear All Data & Reset' : 'Delete Account & Data'}
-              </Text>
-              <Text style={styles.menuItemSubtext}>
-                Permanently wipe all records & profile
-              </Text>
+              <Text style={[styles.menuItemText, { color: '#EF4444' }]}>Delete Account & Data</Text>
+              <Text style={styles.menuItemSubtext}>Permanently delete account and all cloud data</Text>
             </View>
-            <ChevronRight size={16} color="#EF4444" />
+            <ChevronRight size={16} color={ThemeColors.textMuted} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* App Version Info */}
+      <FinancialProfileModal
+        visible={showFinancialModal}
+        onClose={() => setShowFinancialModal(false)}
+      />
+
+      <SecuritySettingsModal
+        visible={showSecurityModal}
+        onClose={() => setShowSecurityModal(false)}
+      />
+
+      <NotificationsSettingsModal
+        visible={showNotificationsModal}
+        onClose={() => setShowNotificationsModal(false)}
+      />
+
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>Looop • Version 1.0.0</Text>
         <Text style={styles.versionSubtext}>Private • Encrypted • Local-First Security</Text>
@@ -562,7 +565,7 @@ export const ProfileTab: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.canvas,
   },
   scrollContent: {
     padding: 20,
@@ -578,7 +581,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -588,10 +591,12 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     marginRight: 16,
+    borderWidth: 1.5,
+    borderColor: ThemeColors.border,
   },
   avatarText: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 24,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   userInfo: {
@@ -603,9 +608,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   userName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 20,
+    color: ThemeColors.textPrimary,
   },
   proCrownBadge: {
     flexDirection: 'row',
@@ -619,28 +624,34 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   proCrownText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
     color: '#D97706',
   },
   userSubtext: {
-    fontSize: 13,
-    color: '#64748B',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   signInBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 24,
   },
   proBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 24,
+    shadowColor: ThemeColors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   signInIconBox: {
     width: 40,
@@ -664,42 +675,50 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   signInTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   signInSub: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 12,
     color: '#E0F2FE',
     marginTop: 2,
   },
   proBannerTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   proBannerSub: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 12,
-    color: '#EDE9FE',
+    color: '#FFF7ED',
     marginTop: 2,
   },
   menuSection: {
     marginBottom: 24,
   },
   menuTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
+    color: ThemeColors.textMuted,
+    letterSpacing: 0.8,
     marginBottom: 8,
     marginLeft: 4,
+    textTransform: 'uppercase',
   },
   menuCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: ThemeColors.card,
+    borderRadius: 18,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     overflow: 'hidden',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1.5,
   },
   menuItem: {
     flexDirection: 'row',
@@ -710,19 +729,19 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
   menuItemText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.semiBold,
+    fontSize: 14.5,
+    color: ThemeColors.textPrimary,
   },
   menuItemSubtext: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 12,
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   badgePill: {
@@ -732,30 +751,32 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   badgePillActive: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   badgePillBlue: {
     backgroundColor: '#E0F2FE',
   },
   badgePillMuted: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
   },
   badgePillText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
   },
   badgePillTextActive: {
-    color: '#7C3AED',
+    color: ThemeColors.emerald,
   },
   badgePillTextBlue: {
     color: '#0284C7',
   },
   badgePillTextMuted: {
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
   },
   divider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.borderSubtle,
     marginLeft: 64,
   },
   versionContainer: {
@@ -764,13 +785,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   versionText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    color: '#94A3B8',
-    fontWeight: '500',
+    color: ThemeColors.textMuted,
   },
   versionSubtext: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 11,
-    color: '#CBD5E1',
+    color: ThemeColors.textMuted,
     marginTop: 2,
   },
 });

@@ -42,6 +42,7 @@ import {
 } from '@/hooks/use-database';
 import { RollingCounter } from '@/shared/ui/organisms/rolling-counter';
 import { useAppStore, useUserStore } from '@/store';
+import { ThemeColors, AppFonts, Radii, Shadows } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -119,13 +120,12 @@ export default function HomeScreen() {
     return 50000;
   }, [settings, monthlyIncome, monthlySavingsTarget]);
 
-  // 2. Real Current Month Spent
+  // 2. Real Current Month Spending from SQLite
   const currentMonthSpent = useMemo(() => {
     if (!dbTransactions || dbTransactions.length === 0) return 0;
     return dbTransactions
       .filter(
         (tx) =>
-          tx.type === 'expense' &&
           (tx.date ? tx.date.startsWith(currentMonthPrefix) : tx.createdAt?.startsWith(currentMonthPrefix))
       )
       .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
@@ -143,7 +143,6 @@ export default function HomeScreen() {
     return dbTransactions
       .filter(
         (tx) =>
-          tx.type === 'expense' &&
           (tx.date === todayDateStr || tx.createdAt?.startsWith(todayDateStr))
       )
       .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
@@ -247,14 +246,13 @@ export default function HomeScreen() {
           : undefined,
       };
 
-      // Subtract the day's incremental savings to get the previous day's baseline
-      runningTotal = Math.max(runningTotal - day.dailySaved, 0);
+      runningTotal -= day.dailySaved;
     }
 
     return points;
-  }, [totalSavedTillNow, weeklyGoalsList, todayDateStr]);
+  }, [weeklyGoalsList, totalSavedTillNow, todayDateStr]);
 
-  // 7. Real Category Breakdown
+  // 7. Real Category Spend Breakdown from SQLite
   const categoryBreakdown = useMemo(() => {
     if (!dbTransactions || dbTransactions.length === 0) {
       return [];
@@ -262,7 +260,6 @@ export default function HomeScreen() {
 
     const currentMonthExpenses = dbTransactions.filter(
       (tx) =>
-        tx.type === 'expense' &&
         (tx.date ? tx.date.startsWith(currentMonthPrefix) : tx.createdAt?.startsWith(currentMonthPrefix))
     );
 
@@ -294,7 +291,7 @@ export default function HomeScreen() {
       const styling = catColorMap[catName] || {
         color: '#7C3AED',
         bg: '#F3E8FF',
-        icon: tx.icon || 'Wallet',
+        icon: 'Wallet',
       };
 
       if (!aggMap[catName]) {
@@ -326,12 +323,11 @@ export default function HomeScreen() {
   const expenseItems = useMemo(() => {
     if (dbTransactions && dbTransactions.length > 0) {
       return dbTransactions
-        .filter((tx) => tx.type === 'expense')
         .map((tx) => ({
           id: tx.id,
-          description: tx.title,
+          description: tx.description || tx.category || 'Expense',
           category: tx.category || 'General',
-          icon: tx.icon || 'Wallet',
+          icon: tx.category || 'Wallet',
           timestamp: tx.timestamp || 'Today',
           amount: Math.abs(tx.amount),
         }));
@@ -358,15 +354,15 @@ export default function HomeScreen() {
     ];
   }, [currentMonthSpent, remainingBudget]);
 
-  // Theme Constants
-  const bg = '#FFFFFF';
-  const cardBg = '#FFFFFF';
-  const cardBorder = 'rgba(15, 15, 20, 0.06)';
-  const textPrimary = '#0F172A';
-  const textSecondary = '#64748B';
-  const iconBtnBg = '#F4F4F7';
-  const badgeBg = '#F4F4F7';
-  const dividerColor = '#F1F5F9';
+  // Theme Constants (Harmonized with Auth & Onboarding)
+  const bg = ThemeColors.canvas;
+  const cardBg = ThemeColors.card;
+  const cardBorder = ThemeColors.border;
+  const textPrimary = ThemeColors.textPrimary;
+  const textSecondary = ThemeColors.textSecondary;
+  const iconBtnBg = ThemeColors.card;
+  const badgeBg = ThemeColors.primarySoft;
+  const dividerColor = ThemeColors.borderSubtle;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -856,6 +852,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: ThemeColors.canvas,
   },
   content: {
     flex: 1,
@@ -880,7 +877,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 1.5,
-    borderColor: '#7C3AED',
+    borderColor: ThemeColors.border,
   },
   avatarGradient: {
     width: 44,
@@ -890,8 +887,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 17,
     color: '#FFFFFF',
   },
   headerTextContainer: {
@@ -899,31 +896,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   greeting: {
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: -0.3,
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 20,
+    color: ThemeColors.textPrimary,
+    letterSpacing: -0.4,
   },
   personalizedMsg: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   iconButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: ThemeColors.card,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   card: {
     borderRadius: 24,
     padding: 18,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    backgroundColor: ThemeColors.card,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 12,
+    shadowRadius: 8,
     elevation: 2,
     marginBottom: 16,
   },
@@ -938,25 +947,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 12,
   },
   cardBadgeSavings: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   cardBadgeBudget: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 11,
+    letterSpacing: 0.2,
   },
   togglePillContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 10,
     padding: 3,
     gap: 2,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
   },
   togglePillBtn: {
     width: 28,
@@ -966,10 +982,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   togglePillBtnActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    backgroundColor: ThemeColors.card,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 3,
     elevation: 1,
   },
@@ -977,8 +993,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   amountLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: ThemeColors.textMuted,
     marginBottom: 2,
   },
   amountRow: {
@@ -986,8 +1005,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currency: {
-    fontSize: 26,
-    fontWeight: '800',
+    fontFamily: AppFonts.outfit.extraBold,
+    fontSize: 28,
     marginRight: 4,
   },
   chartHeaderRow: {
@@ -999,15 +1018,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   chartHeaderTitle: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 9.5,
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   chartHeaderSpend: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#7C3AED',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
+    color: ThemeColors.emerald,
   },
   giftedChartWrapper: {
     alignItems: 'center',
@@ -1073,15 +1092,15 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   tooltipDateLabel: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 10,
-    fontWeight: '600',
     color: '#94A3B8',
     marginBottom: 2,
     letterSpacing: 0.2,
   },
   tooltipAmount: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 12,
-    fontWeight: '800',
     color: '#34D399',
     fontVariant: ['tabular-nums'],
   },
@@ -1105,21 +1124,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
   },
   statusText: {
-    fontSize: 11,
-    fontWeight: '500',
+    fontFamily: AppFonts.inter.medium,
+    fontSize: 11.5,
   },
   growthBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
     backgroundColor: '#ECFDF5',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   growthBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
     color: '#059669',
   },
   budgetCircleWrapper: {
@@ -1136,14 +1155,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   circlePercentText: {
+    fontFamily: AppFonts.outfit.extraBold,
     fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   circlePercentSub: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 9,
-    fontWeight: '800',
-    color: '#7C3AED',
+    color: ThemeColors.primary,
     letterSpacing: 0.6,
   },
   budgetMetricsCol: {
@@ -1155,44 +1174,44 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   budgetMetricLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 9,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   budgetMetricValue: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   budgetOfTotal: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#64748B',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 10.5,
+    color: ThemeColors.textSecondary,
   },
   safePacePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAF5FF',
+    backgroundColor: '#FFF7ED',
     borderWidth: 1,
-    borderColor: '#E9D5FF',
+    borderColor: '#FFEDD5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
   safePaceText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#7C3AED',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
+    color: ThemeColors.primary,
   },
   catBreakdownContainer: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 16,
     padding: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: ThemeColors.borderSubtle,
   },
   catBarHeader: {
     flexDirection: 'row',
@@ -1201,21 +1220,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   catBarHeaderTitle: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 9.5,
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   catBarHeaderSub: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   segmentedBarTrack: {
     flexDirection: 'row',
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
     overflow: 'hidden',
     marginBottom: 12,
     gap: 2,
@@ -1248,21 +1267,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   catRowName: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.semiBold,
+    fontSize: 12.5,
+    color: ThemeColors.textPrimary,
     maxWidth: 140,
   },
   catRowAmount: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 12.5,
+    color: ThemeColors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
   catProgressTrack: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.borderSubtle,
     overflow: 'hidden',
   },
   catProgressFill: {
@@ -1275,8 +1294,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   catPercentBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
   },
   catEmptyBox: {
     alignItems: 'center',
@@ -1285,15 +1304,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   catEmptyTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 4,
   },
   catEmptySub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 11,
-    fontWeight: '500',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     textAlign: 'center',
     maxWidth: 220,
   },
@@ -1321,30 +1340,37 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: -0.2,
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 18,
+    color: ThemeColors.textPrimary,
+    letterSpacing: -0.3,
   },
   countBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   countText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
+    color: ThemeColors.primary,
   },
   totalBadge: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   totalLabel: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontFamily: AppFonts.inter.medium,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
   },
   currencySmall: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 14,
-    fontWeight: '700',
+    color: ThemeColors.textPrimary,
   },
   listCard: {
     flex: 1,
@@ -1388,7 +1414,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
+    borderColor: ThemeColors.border,
     zIndex: 1,
   },
   timelineContentWrapper: {
@@ -1399,16 +1426,27 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   expenseTime: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 11,
-    fontWeight: '600',
+    color: ThemeColors.textSecondary,
   },
   timelineContentBox: {
     padding: 12,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    backgroundColor: ThemeColors.card,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   expenseText: {
-    fontSize: 13,
+    fontFamily: AppFonts.jakarta.medium,
+    fontSize: 13.5,
+    color: ThemeColors.textPrimary,
+    lineHeight: 20,
   },
   emptyListContainer: {
     paddingVertical: 36,
@@ -1421,19 +1459,23 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
   },
   emptyListTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
+    color: ThemeColors.textPrimary,
     letterSpacing: -0.2,
   },
   emptyListSub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 13,
-    fontWeight: '500',
+    color: ThemeColors.textSecondary,
     textAlign: 'center',
     maxWidth: 240,
     lineHeight: 18,

@@ -4,6 +4,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Sparkles, Check, Zap } from 'lucide-react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 import type { ParsedExpenseResult, CategoryItem } from '@/lib/expense-nlp-parser';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 interface AIVerificationOverlayProps {
   insets: EdgeInsets;
@@ -38,18 +39,18 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
         <View
           style={[
             styles.verifyingSparkleBadge,
-            !isAIParsed && { backgroundColor: '#FEF3C7' },
+            !isAIParsed && { backgroundColor: ThemeColors.amberSoft, borderColor: ThemeColors.amberBorder },
           ]}
         >
           {isAIParsed ? (
-            <Sparkles size={14} color="#9333EA" />
+            <Sparkles size={14} color={ThemeColors.violet} />
           ) : (
-            <Zap size={14} color="#D97706" />
+            <Zap size={14} color={ThemeColors.amber} />
           )}
           <Text
             style={[
               styles.verifyingSparkleText,
-              !isAIParsed && { color: '#D97706' },
+              !isAIParsed && { color: ThemeColors.amber },
             ]}
           >
             {isAIParsed ? 'FIREBASE AI (GEMINI)' : 'LOCAL PATTERN PARSER'}
@@ -138,7 +139,7 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
                 : 'Classifying category...'}
             </Text>
             <Text style={styles.pipelineStepSub}>
-              {verifiedStepCount >= 2 ? 'Matched with category budget' : 'Identifying merchant category'}
+              {verifiedStepCount >= 2 ? 'Matched with category budget' : 'Identifying category'}
             </Text>
           </View>
         </View>
@@ -182,7 +183,7 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
           </View>
         </View>
 
-        {/* Step 4: Note & Merchant */}
+        {/* Step 4: Description */}
         <View style={[styles.pipelineRow, { marginBottom: 0 }]}>
           <View style={styles.pipelineIndicatorCol}>
             <View
@@ -206,11 +207,11 @@ export const AIVerificationOverlay: React.FC<AIVerificationOverlayProps> = React
               ]}
             >
               {verifiedStepCount >= 4
-                ? `Parsed note: ${parsedNLPResult?.merchant || reason || 'Expense'}`
-                : 'Extracting note & payment...'}
+                ? `Parsed description: ${parsedNLPResult?.description || reason || 'Expense'}`
+                : 'Extracting description...'}
             </Text>
             <Text style={styles.pipelineStepSub}>
-              {verifiedStepCount >= 4 ? 'Merchant and payment method tagged' : 'Classifying transaction description'}
+              {verifiedStepCount >= 4 ? 'Description captured' : 'Classifying transaction note'}
             </Text>
           </View>
         </View>
@@ -237,37 +238,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#FAF5FF',
+    backgroundColor: ThemeColors.violetSoft,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
+    borderColor: ThemeColors.violetBorder,
     marginBottom: 12,
   },
   verifyingSparkleText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#9333EA',
+    color: ThemeColors.violet,
     letterSpacing: 0.8,
   },
   verifyingTitle: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 26,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   verifyingSubtitle: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
   },
   verifyingChecklistCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 24,
     padding: 22,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.06,
@@ -287,45 +288,48 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pipelineCircleDone: {
-    backgroundColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
+    borderColor: ThemeColors.emerald,
   },
   pipelineDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: ThemeColors.border,
   },
   pipelineConnector: {
     width: 2,
     flex: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
     marginVertical: 4,
   },
   pipelineConnectorDone: {
-    backgroundColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
   },
   pipelineContentCol: {
     flex: 1,
     justifyContent: 'center',
   },
   pipelineStepLabel: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   pipelineStepLabelDone: {
-    color: '#0F172A',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.textPrimary,
   },
   pipelineStepSub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 12,
-    fontWeight: '500',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     marginTop: 2,
   },
 });

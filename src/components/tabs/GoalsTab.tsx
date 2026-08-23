@@ -61,6 +61,7 @@ import { CompleteTaskModal } from '@/components/goals/CompleteTaskModal';
 import { Report, WeeklyGoal, MilestoneVault } from '@/db/schema';
 import { useAppStore } from '@/store';
 import { getStoryScheduleInfo, checkAutoGenerationNeeded } from '@/utils/story-scheduler';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -489,106 +490,10 @@ export const GoalsTab: React.FC = () => {
         {/* ------------------------------------------------------------- */}
         {activeSegment === 'stories' && (
           <View style={styles.storiesContainer}>
-            {/* Story Schedule & Next Release Countdown Card */}
-            <View style={styles.scheduleCard}>
-              <View style={styles.scheduleHeaderRow}>
-                <View style={styles.scheduleHeaderLeft}>
-                  <Clock size={15} color="#7C3AED" />
-                  <Text style={styles.scheduleHeaderTitle}>STORY RELEASE SCHEDULE</Text>
-                </View>
-                <View style={styles.scheduleAutoBadge}>
-                  <Sparkles size={11} color="#059669" />
-                  <Text style={styles.scheduleAutoBadgeText}>BACKGROUND AUTOMATION</Text>
-                </View>
-              </View>
-
-              <Text style={styles.scheduleExplainer}>
-                Your AI Biographer monitors spending and generates stories automatically in the background:
-              </Text>
-
-              {/* 2 Schedule Subcards */}
-              <View style={styles.scheduleCardsRow}>
-                {/* 1. Weekly Cadence Card */}
-                <View style={styles.scheduleSubCard}>
-                  <View style={styles.scheduleBadgeRow}>
-                    <View style={[styles.cadenceTag, { backgroundColor: '#F3E8FF' }]}>
-                      <Calendar size={11} color="#7C3AED" />
-                      <Text style={[styles.cadenceTagText, { color: '#7C3AED' }]}>EVERY 7 DAYS</Text>
-                    </View>
-                    <Text style={styles.countdownPill}>
-                      {scheduleInfo.weeklyDaysRemaining === 0 ? 'Due Today' : `In ${scheduleInfo.weeklyDaysRemaining}d`}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.scheduleCardTitle}>Weekly Habit Essay</Text>
-                  <Text style={styles.scheduleCardSub}>
-                    Next: {scheduleInfo.weeklyFormattedDate}
-                  </Text>
-
-                  {/* Progress Bar */}
-                  <View style={styles.scheduleProgressBox}>
-                    <View style={styles.scheduleProgressTrack}>
-                      <View
-                        style={[
-                          styles.scheduleProgressFill,
-                          { width: `${scheduleInfo.weeklyCycleProgress}%`, backgroundColor: '#7C3AED' },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.scheduleProgressLabel}>
-                      Day {scheduleInfo.weeklyCycleDay} of 7 • {scheduleInfo.weeklyCycleProgress}%
-                    </Text>
-                  </View>
-
-                  <View style={styles.autoDeliveryPill}>
-                    <Sparkles size={12} color="#7C3AED" />
-                    <Text style={styles.autoDeliveryPillText}>Auto-delivered every Sunday at 8:00 PM</Text>
-                  </View>
-                </View>
-
-                {/* 2. Monthly Edition Card */}
-                <View style={styles.scheduleSubCard}>
-                  <View style={styles.scheduleBadgeRow}>
-                    <View style={[styles.cadenceTag, { backgroundColor: '#E0F2FE' }]}>
-                      <BookOpen size={11} color="#0284C7" />
-                      <Text style={[styles.cadenceTagText, { color: '#0284C7' }]}>END OF MONTH</Text>
-                    </View>
-                    <Text style={[styles.countdownPill, { backgroundColor: '#E0F2FE', color: '#0284C7' }]}>
-                      {scheduleInfo.monthlyDaysRemaining === 0 ? 'Due Today' : `In ${scheduleInfo.monthlyDaysRemaining}d`}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.scheduleCardTitle}>Monthly Retrospective</Text>
-                  <Text style={styles.scheduleCardSub}>
-                    Next: {scheduleInfo.monthlyFormattedDate}
-                  </Text>
-
-                  {/* Progress Bar */}
-                  <View style={styles.scheduleProgressBox}>
-                    <View style={styles.scheduleProgressTrack}>
-                      <View
-                        style={[
-                          styles.scheduleProgressFill,
-                          { width: `${scheduleInfo.monthlyCycleProgress}%`, backgroundColor: '#0284C7' },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.scheduleProgressLabel}>
-                      Day {scheduleInfo.monthlyCycleDay} of {scheduleInfo.monthlyTotalDays} • {scheduleInfo.monthlyCycleProgress}%
-                    </Text>
-                  </View>
-
-                  <View style={[styles.autoDeliveryPill, { backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' }]}>
-                    <BookOpen size={12} color="#0284C7" />
-                    <Text style={[styles.autoDeliveryPillText, { color: '#0284C7' }]}>Auto-delivered at month end</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-
+            {/* Section Header */}
             <View style={styles.sectionTitleRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <BookOpen size={16} color="#7C3AED" />
+                <BookOpen size={16} color={ThemeColors.primary} />
                 <Text style={styles.sectionTitle}>Published Stories & Essays</Text>
               </View>
             </View>
@@ -596,80 +501,124 @@ export const GoalsTab: React.FC = () => {
             {effectiveReports.length === 0 ? (
               <View style={styles.tabEmptyContainer}>
                 <View style={styles.tabEmptyIconBox}>
-                  <BookOpen size={26} color="#7C3AED" />
+                  <BookOpen size={26} color={ThemeColors.primary} />
                 </View>
                 <Text style={styles.tabEmptyTitle}>AI Biographer is Tracking Your Habits</Text>
                 <Text style={styles.tabEmptySub}>
                   Stories are generated automatically in the background on their scheduled release dates. Your first weekly essay will drop on Sunday at 8:00 PM.
                 </Text>
 
-                <View style={styles.autoScheduleBanner}>
-                  <Sparkles size={13} color="#7C3AED" />
-                  <Text style={styles.autoScheduleBannerText}>
-                    Automated background delivery active • Next drop: {scheduleInfo.weeklyFormattedDate}
-                  </Text>
+                {/* Compact Schedule Pill Inside Empty State */}
+                <View style={styles.compactScheduleCard}>
+                  <View style={styles.compactScheduleLeft}>
+                    <View style={styles.compactScheduleIconBox}>
+                      <Clock size={15} color={ThemeColors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.compactScheduleTitleRow}>
+                        <Text style={styles.compactScheduleTitle}>
+                          Next Drop: {scheduleInfo.weeklyFormattedDate}
+                        </Text>
+                        <View style={styles.compactScheduleBadge}>
+                          <Text style={styles.compactScheduleBadgeText}>
+                            {scheduleInfo.weeklyDaysRemaining === 0 ? 'Due Today' : `In ${scheduleInfo.weeklyDaysRemaining}d`}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.compactScheduleSubtext}>
+                        Weekly Habit Essay • Auto-delivered at 8:00 PM
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
             ) : (
-              effectiveReports.map((report) => (
-                <TouchableOpacity
-                  key={report.id}
-                  activeOpacity={0.88}
-                  onPress={() => handleOpenArticle(report)}
-                  style={styles.storyCard}
-                >
-                  {/* Header Tag */}
-                  <View style={styles.storyCardHeader}>
-                    <View style={styles.storyTagBadge}>
-                      <Text style={styles.storyTagBadgeText}>
-                        {report.periodType === 'weekly' ? 'WEEKLY ESSAY' : 'MONTHLY EDITION'}
+              <>
+                {/* Published Stories Feed */}
+                {effectiveReports.map((report) => (
+                  <TouchableOpacity
+                    key={report.id}
+                    activeOpacity={0.88}
+                    onPress={() => handleOpenArticle(report)}
+                    style={styles.storyCard}
+                  >
+                    {/* Header Tag */}
+                    <View style={styles.storyCardHeader}>
+                      <View style={styles.storyTagBadge}>
+                        <Text style={styles.storyTagBadgeText}>
+                          {report.periodType === 'weekly' ? 'WEEKLY ESSAY' : 'MONTHLY EDITION'}
+                        </Text>
+                      </View>
+                      <Text style={styles.storyReadTime}>{report.readTime}</Text>
+                    </View>
+
+                    {/* Hook Title */}
+                    <Text style={styles.storyHookTitle}>{report.hookTitle}</Text>
+
+                    {/* Subtitle */}
+                    <Text style={styles.storySubDescription} numberOfLines={2}>
+                      {report.subDescription}
+                    </Text>
+
+                    {/* 3 Impact Pills */}
+                    <View style={styles.storyPillRow}>
+                      <View style={styles.storyMiniPill}>
+                        <HeartPulse size={12} color="#EF4444" style={{ marginRight: 4 }} />
+                        <Text style={styles.storyMiniPillText}>Health</Text>
+                      </View>
+
+                      <View style={styles.storyMiniPill}>
+                        <Users size={12} color="#0284C7" style={{ marginRight: 4 }} />
+                        <Text style={styles.storyMiniPillText}>Family</Text>
+                      </View>
+
+                      <View style={styles.storyMiniPill}>
+                        <TrendingUp size={12} color="#059669" style={{ marginRight: 4 }} />
+                        <Text style={styles.storyMiniPillText}>Milestone</Text>
+                      </View>
+                    </View>
+
+                    {/* Footer Action */}
+                    <View style={styles.storyFooter}>
+                      <View>
+                        <Text style={styles.storySavingsLabel}>ESTIMATED SAVINGS</Text>
+                        <Text style={styles.storySavingsAmount}>
+                          +{currencySymbol}{report.estimatedSavings.toLocaleString('en-IN')}
+                        </Text>
+                      </View>
+
+                      <View style={styles.readArticleBtn}>
+                        <Text style={styles.readArticleBtnText}>Read & Action</Text>
+                        <ArrowRight size={14} color={ThemeColors.primary} />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+
+                {/* Compact Story Release Schedule Micro-Card at Bottom */}
+                <View style={styles.compactScheduleCard}>
+                  <View style={styles.compactScheduleLeft}>
+                    <View style={styles.compactScheduleIconBox}>
+                      <Clock size={15} color={ThemeColors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.compactScheduleTitleRow}>
+                        <Text style={styles.compactScheduleTitle}>
+                          Next Drop: {scheduleInfo.weeklyFormattedDate} (8:00 PM)
+                        </Text>
+                        <View style={styles.compactScheduleBadge}>
+                          <Text style={styles.compactScheduleBadgeText}>
+                            {scheduleInfo.weeklyDaysRemaining === 0 ? 'Today' : `in ${scheduleInfo.weeklyDaysRemaining}d`}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.compactScheduleSubtext}>
+                        Weekly Habit Essay • Auto-delivered in background
                       </Text>
                     </View>
-                    <Text style={styles.storyReadTime}>{report.readTime}</Text>
                   </View>
-
-                  {/* Hook Title */}
-                  <Text style={styles.storyHookTitle}>{report.hookTitle}</Text>
-
-                  {/* Subtitle */}
-                  <Text style={styles.storySubDescription} numberOfLines={2}>
-                    {report.subDescription}
-                  </Text>
-
-                  {/* 3 Impact Pills */}
-                  <View style={styles.storyPillRow}>
-                    <View style={styles.storyMiniPill}>
-                      <HeartPulse size={12} color="#EF4444" style={{ marginRight: 4 }} />
-                      <Text style={styles.storyMiniPillText}>Health</Text>
-                    </View>
-
-                    <View style={styles.storyMiniPill}>
-                      <Users size={12} color="#0284C7" style={{ marginRight: 4 }} />
-                      <Text style={styles.storyMiniPillText}>Family</Text>
-                    </View>
-
-                    <View style={styles.storyMiniPill}>
-                      <TrendingUp size={12} color="#059669" style={{ marginRight: 4 }} />
-                      <Text style={styles.storyMiniPillText}>Milestone</Text>
-                    </View>
-                  </View>
-
-                  {/* Footer Action */}
-                  <View style={styles.storyFooter}>
-                    <View>
-                      <Text style={styles.storySavingsLabel}>ESTIMATED SAVINGS</Text>
-                      <Text style={styles.storySavingsAmount}>
-                        +{currencySymbol}{report.estimatedSavings.toLocaleString('en-IN')}
-                      </Text>
-                    </View>
-
-                    <View style={styles.readArticleBtn}>
-                      <Text style={styles.readArticleBtnText}>Read & Action</Text>
-                      <ArrowRight size={14} color="#7C3AED" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))
+                </View>
+              </>
             )}
           </View>
         )}
@@ -1263,6 +1212,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
+    backgroundColor: ThemeColors.canvas,
   },
   topHeaderBar: {
     flexDirection: 'row',
@@ -1271,45 +1221,45 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenHeaderTitle: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 28,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     letterSpacing: -0.6,
   },
   screenHeaderSubtitle: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   newGoalHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 14,
-    shadowColor: '#7C3AED',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
   },
   newGoalHeaderBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 13,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   coachCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 22,
     padding: 18,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 2,
@@ -1324,23 +1274,23 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   coachName: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 13.5,
+    color: ThemeColors.textPrimary,
   },
   coachDate: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 11,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   coachMessage: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontFamily: AppFonts.jakarta.medium,
+    fontSize: 13.5,
     color: '#334155',
     lineHeight: 20,
     marginBottom: 12,
@@ -1354,29 +1304,29 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.borderSubtle,
     overflow: 'hidden',
   },
   coachProgressBarFill: {
     height: '100%',
     borderRadius: 3,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
   },
   coachPercentText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   segmentWrapper: {
     marginBottom: 18,
   },
   segmentContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 16,
     padding: 4,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   segmentBtn: {
     flex: 1,
@@ -1387,21 +1337,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   segmentBtnActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
+    backgroundColor: ThemeColors.card,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
   },
   segmentBtnText: {
+    fontFamily: AppFonts.jakarta.medium,
     fontSize: 12,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   segmentBtnTextActive: {
-    color: '#0F172A',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.textPrimary,
   },
   sectionTitleRow: {
     flexDirection: 'row',
@@ -1410,23 +1360,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 18,
+    color: ThemeColors.textPrimary,
     letterSpacing: -0.2,
   },
   storiesContainer: {
     marginBottom: 20,
   },
   storyCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 22,
     padding: 18,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 2,
@@ -1438,34 +1388,36 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   storyTagBadge: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   storyTagBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
-    color: '#7C3AED',
+    color: ThemeColors.primary,
     letterSpacing: 0.6,
   },
   storyReadTime: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   storyHookTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 18,
+    color: ThemeColors.textPrimary,
     lineHeight: 24,
     letterSpacing: -0.3,
     marginBottom: 6,
   },
   storySubDescription: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 13,
-    fontWeight: '400',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     lineHeight: 19,
     marginBottom: 12,
   },
@@ -1478,17 +1430,17 @@ const styles = StyleSheet.create({
   storyMiniPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: ThemeColors.border,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
   },
   storyMiniPillText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#475569',
+    fontFamily: AppFonts.jakarta.semiBold,
+    fontSize: 10.5,
+    color: ThemeColors.textSecondary,
   },
   storyFooter: {
     flexDirection: 'row',
@@ -1496,40 +1448,42 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: ThemeColors.borderSubtle,
   },
   storySavingsLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   storySavingsAmount: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 16,
-    fontWeight: '800',
-    color: '#059669',
+    color: ThemeColors.emerald,
   },
   readArticleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   readArticleBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    fontWeight: '700',
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   vaultsContainer: {
     marginBottom: 20,
   },
   roadmapSubtext: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
     marginBottom: 16,
     lineHeight: 18,
   },
@@ -1546,7 +1500,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -1554,20 +1508,20 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   timelineDotActive: {
-    backgroundColor: '#7C3AED',
-    borderColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
+    borderColor: ThemeColors.primary,
   },
   timelineDotCompleted: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
+    borderColor: ThemeColors.emerald,
   },
   timelineDotLocked: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#E2E8F0',
+    backgroundColor: ThemeColors.surface,
+    borderColor: ThemeColors.border,
   },
   timelineNumber: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 11,
-    fontWeight: '800',
     color: '#FFFFFF',
   },
   timelineConnectorLine: {
@@ -1575,27 +1529,27 @@ const styles = StyleSheet.create({
     width: 2,
     top: 26,
     bottom: -16,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
   },
   vaultCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
     elevation: 2,
   },
   vaultCardActive: {
-    borderColor: '#C084FC',
+    borderColor: '#FED7AA',
     borderWidth: 1.5,
   },
   vaultCardLocked: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     opacity: 0.85,
   },
   vaultHeaderRow: {
@@ -1618,14 +1572,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   vaultTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 15.5,
+    color: ThemeColors.textPrimary,
   },
   vaultTargetDate: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 11,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 1,
   },
   stagePill: {
@@ -1634,39 +1588,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   stagePillActive: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   stagePillCompleted: {
     backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   stagePillLocked: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
   },
   stagePillText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
   },
   stagePillTextActive: {
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   stagePillTextCompleted: {
-    color: '#059669',
+    color: ThemeColors.emerald,
   },
   stagePillTextLocked: {
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
   },
   lockedNoticeBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 10,
     padding: 10,
     marginTop: 4,
   },
   lockedNoticeText: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 11,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     flex: 1,
     lineHeight: 16,
   },
@@ -1677,25 +1635,25 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   vaultMetricLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 9.5,
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
   },
   vaultSavedVal: {
+    fontFamily: AppFonts.outfit.extraBold,
     fontSize: 17,
-    fontWeight: '900',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   vaultTargetVal: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   vaultProgressBarBg: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.borderSubtle,
     overflow: 'hidden',
   },
   vaultProgressBarFill: {
@@ -1710,13 +1668,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   vaultPercentText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
   },
   vaultLeftText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#64748B',
+    fontFamily: AppFonts.inter.medium,
+    fontSize: 10.5,
+    color: ThemeColors.textSecondary,
   },
   vaultFooterRow: {
     flexDirection: 'row',
@@ -1724,25 +1682,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: ThemeColors.borderSubtle,
   },
   vaultAutoPaceText: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   vaultDepositBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   vaultDepositBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   habitsSection: {
@@ -1762,19 +1720,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
   },
   filterPillActive: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
+    borderColor: ThemeColors.primary,
   },
   filterPillText: {
+    fontFamily: AppFonts.jakarta.medium,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   filterPillTextActive: {
+    fontFamily: AppFonts.jakarta.bold,
     color: '#FFFFFF',
-    fontWeight: '700',
   },
   taskCardContainer: {
     marginBottom: 10,
@@ -1782,19 +1743,19 @@ const styles = StyleSheet.create({
   taskCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 18,
     padding: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
     elevation: 2,
   },
   taskCardDone: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     opacity: 0.85,
   },
   checkboxTouch: {
@@ -1810,8 +1771,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkCircleFilled: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
+    backgroundColor: ThemeColors.emerald,
+    borderColor: ThemeColors.emerald,
   },
   taskIconCircle: {
     width: 36,
@@ -1832,23 +1793,23 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   taskCategoryLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
     letterSpacing: 0.4,
   },
   taskSavingsAmount: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 11.5,
+    color: ThemeColors.textSecondary,
   },
   taskTitleText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 13.5,
+    color: ThemeColors.textPrimary,
   },
   taskTitleTextDone: {
     textDecorationLine: 'line-through',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
   },
   taskActionPill: {
     paddingHorizontal: 10,
@@ -1856,40 +1817,44 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   taskActionPillActive: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   taskActionPillDone: {
     backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   taskActionPillText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
   },
   taskActionPillTextActive: {
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   taskActionPillTextDone: {
-    color: '#059669',
+    color: ThemeColors.emerald,
   },
   emptyCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 20,
     padding: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   emptyCardTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     marginTop: 10,
   },
   emptyCardSub: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -1899,11 +1864,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   addModalCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 22,
-    shadowColor: '#000',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
@@ -1916,28 +1881,29 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   addModalTitle: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 19,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   inputLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.6,
     marginBottom: 6,
     marginTop: 10,
+    textTransform: 'uppercase',
   },
   textInputField: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 14,
     paddingHorizontal: 14,
     height: 48,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#0F172A',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    fontFamily: AppFonts.jakarta.medium,
+    color: ThemeColors.textPrimary,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   presetChipsRow: {
     flexDirection: 'row',
@@ -1950,20 +1916,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
   },
   pAmtChipActive: {
-    backgroundColor: '#F3E8FF',
-    borderWidth: 1,
-    borderColor: '#7C3AED',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.2,
+    borderColor: '#FFEDD5',
   },
   pAmtChipText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   pAmtChipTextActive: {
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   catChipsRow: {
     gap: 6,
@@ -1977,66 +1945,71 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    backgroundColor: ThemeColors.card,
   },
   catChipText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 12,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   modalSubmitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     paddingVertical: 14,
     borderRadius: 14,
     marginTop: 8,
+    shadowColor: ThemeColors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   modalSubmitBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   depositModalCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 24,
     marginHorizontal: 20,
     marginVertical: 'auto',
     padding: 22,
-    shadowColor: '#000',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
   depositVaultPreview: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 12,
     padding: 12,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   depositVaultName: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   depositVaultCurrent: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   tabEmptyContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     padding: 28,
     alignItems: 'center',
     justifyContent: 'center',
@@ -2047,21 +2020,23 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
   },
   tabEmptyTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     textAlign: 'center',
   },
   tabEmptySub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     textAlign: 'center',
     lineHeight: 19,
     maxWidth: 280,
@@ -2070,30 +2045,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderRadius: 14,
     marginTop: 10,
-    shadowColor: '#7C3AED',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
   tabEmptyActionBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
   generateAiBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7C3AED',
+    backgroundColor: ThemeColors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
-    shadowColor: '#7C3AED',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -2103,165 +2078,69 @@ const styles = StyleSheet.create({
     opacity: 0.65,
   },
   generateAiBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
-  scheduleCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  compactScheduleCard: {
+    backgroundColor: ThemeColors.card,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    marginTop: 6,
+    marginBottom: 14,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
-  scheduleHeaderRow: {
+  compactScheduleLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+    gap: 10,
   },
-  scheduleHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  scheduleHeaderTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    color: '#7C3AED',
-  },
-  scheduleAutoBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  scheduleAutoBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-    color: '#059669',
-  },
-  scheduleExplainer: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
-    lineHeight: 17,
-    marginBottom: 14,
-  },
-  scheduleCardsRow: {
-    gap: 12,
-  },
-  scheduleSubCard: {
-    backgroundColor: '#F8FAFC',
+  compactScheduleIconBox: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  scheduleBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  cadenceTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  cadenceTagText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  countdownPill: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#7C3AED',
-    backgroundColor: '#F3E8FF',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  scheduleCardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 2,
-  },
-  scheduleCardSub: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#64748B',
-    marginBottom: 10,
-  },
-  scheduleProgressBox: {
-    marginBottom: 12,
-  },
-  scheduleProgressTrack: {
-    height: 6,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  scheduleProgressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  scheduleProgressLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  autoDeliveryPill: {
-    flexDirection: 'row',
+    backgroundColor: '#FFF7ED',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: '#FAF5FF',
     borderWidth: 1,
-    borderColor: '#E9D5FF',
+    borderColor: '#FFEDD5',
   },
-  autoDeliveryPillText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#7C3AED',
-  },
-  autoScheduleBanner: {
+  compactScheduleTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#FAF5FF',
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-    marginTop: 10,
+    justifyContent: 'space-between',
+    marginBottom: 2,
   },
-  autoScheduleBannerText: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B21A8',
+  compactScheduleTitle: {
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 13,
+    color: ThemeColors.textPrimary,
+  },
+  compactScheduleBadge: {
+    backgroundColor: '#FFF7ED',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
+  },
+  compactScheduleBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10,
+    color: ThemeColors.primary,
+    letterSpacing: 0.3,
+  },
+  compactScheduleSubtext: {
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 11.5,
+    color: ThemeColors.textSecondary,
     lineHeight: 16,
   },
 });

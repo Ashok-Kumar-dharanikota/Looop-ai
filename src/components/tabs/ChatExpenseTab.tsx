@@ -57,6 +57,7 @@ import { KeypadGrid } from '@/components/expense/KeypadGrid';
 import { VoiceRecordingOverlay } from '@/components/expense/VoiceRecordingOverlay';
 import { AIVerificationOverlay } from '@/components/expense/AIVerificationOverlay';
 import { ReceiptSummaryCard } from '@/components/expense/ReceiptSummaryCard';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 // Re-export CATEGORIES for backwards compatibility if imported elsewhere
 export { CATEGORIES };
@@ -85,7 +86,6 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
   const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState<string>('Just now');
   const [reason, setReason] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<string>('UPI (GPay / PhonePe)');
   const [isSaved, setIsSaved] = useState(false);
 
   // Bottom floating text input
@@ -159,8 +159,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
       }
 
       setTime(parsed.timeLabel);
-      setReason(parsed.merchant || parsed.reason || '');
-      setPaymentMethod(parsed.paymentMethod);
+      setReason(parsed.description || parsed.reason || parsed.merchant || '');
 
       // 3. Trigger sequential verification step highlights
       setVerifiedStepCount(1);
@@ -191,7 +190,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
             setCurrentStep('amount');
           } else if (parsed.missingFields.includes('category')) {
             setCurrentStep('category');
-          } else if (parsed.missingFields.includes('merchant') || parsed.missingFields.includes('reason')) {
+          } else if (parsed.missingFields.includes('description')) {
             setCurrentStep('reason');
           } else {
             setCurrentStep('summary');
@@ -381,21 +380,21 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
       }
 
       const newTxId = 'tx_' + Date.now();
-      const combinedTimestamp = parsedNLPResult?.timestamp || new Date().toISOString();
+      const nowIso = new Date().toISOString();
+      const combinedTimestamp = parsedNLPResult?.timestamp || nowIso;
       const cleanTimeDisplay = parsedNLPResult?.timeStr
         ? `${formattedDate === todayDateStr ? 'Today' : formattedDate}, ${parsedNLPResult.timeStr}`
         : time;
 
       await addTxMutation.mutateAsync({
         id: newTxId,
-        title: reason.trim() || (selectedCategory ? selectedCategory.name : 'Expense'),
         amount: numericAmount,
-        type: 'expense',
         category: selectedCategory ? selectedCategory.name : 'General',
-        icon: selectedCategory?.iconName || 'Wallet',
-        timestamp: cleanTimeDisplay,
         date: formattedDate,
+        timestamp: cleanTimeDisplay,
+        description: reason.trim() || undefined,
         createdAt: combinedTimestamp,
+        updatedAt: nowIso,
       });
 
       setIsSaved(true);
@@ -558,7 +557,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
 
               {/* Step Progress Pill */}
               <View style={styles.stepProgressPill}>
-                <Sparkles size={13} color="#9333EA" />
+                <Sparkles size={13} color={ThemeColors.primary} />
                 <Text style={styles.stepProgressText}>
                   STEP {currentInfo.stepNumber} OF 5
                 </Text>
@@ -571,7 +570,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                   style={styles.headerIconBtn}
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 >
-                  <RotateCcw size={18} color="#64748B" />
+                  <RotateCcw size={18} color={ThemeColors.textSecondary} />
                 </TouchableOpacity>
               ) : (
                 <View style={{ width: 38 }} />
@@ -693,13 +692,13 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                       <View
                         style={[
                           styles.miniBadge,
-                          { backgroundColor: selectedCategory?.bg || '#F3E8FF' },
+                          { backgroundColor: selectedCategory?.bg || ThemeColors.primarySoft },
                         ]}
                       >
                         <Text
                           style={[
                             styles.miniBadgeText,
-                            { color: selectedCategory?.color || '#9333EA' },
+                            { color: selectedCategory?.color || ThemeColors.primary },
                           ]}
                         >
                           {selectedCategory?.name || 'Category'}
@@ -741,7 +740,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                           >
                             <Calendar
                               size={13}
-                              color={isDateSelected ? '#9333EA' : '#64748B'}
+                              color={isDateSelected ? ThemeColors.primary : ThemeColors.textSecondary}
                             />
                             <Text
                               style={[
@@ -780,7 +779,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                             <View style={styles.timeChipLeft}>
                               <Clock
                                 size={16}
-                                color={isSelected ? '#9333EA' : '#64748B'}
+                                color={isSelected ? ThemeColors.primary : ThemeColors.textSecondary}
                               />
                               <Text
                                 style={[
@@ -820,7 +819,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                       <TextInput
                         style={styles.reasonInput}
                         placeholder="e.g. Starbucks, Grocery run, Uber cab"
-                        placeholderTextColor="#94A3B8"
+                        placeholderTextColor={ThemeColors.textMuted}
                         value={reason}
                         onChangeText={setReason}
                         returnKeyType="done"
@@ -833,7 +832,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           style={{ padding: 4 }}
                         >
-                          <X size={16} color="#94A3B8" />
+                          <X size={16} color={ThemeColors.textMuted} />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -904,11 +903,9 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                     selectedCategory={selectedCategory}
                     time={time}
                     reason={reason}
-                    paymentMethod={paymentMethod}
                     isSaved={isSaved}
                     parsedNLPResult={parsedNLPResult}
                     currencySymbol={currencySymbol}
-                    onPaymentMethodChange={setPaymentMethod}
                     onEditPress={() => setCurrentStep('amount')}
                     onSavePress={handleSaveToDatabase}
                     onResetPress={handleReset}
@@ -944,7 +941,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
               <TextInput
                 style={styles.floatingTextInput}
                 placeholder="Type e.g. 450 lunch subway or ₹300 cab..."
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={ThemeColors.textMuted}
                 value={floatingInputText}
                 onChangeText={setFloatingInputText}
                 returnKeyType="send"
@@ -964,7 +961,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
                 ) : (
                   <Send
                     size={15}
-                    color={floatingInputText.trim() ? '#FFFFFF' : '#94A3B8'}
+                    color={floatingInputText.trim() ? '#FFFFFF' : ThemeColors.textMuted}
                   />
                 )}
               </TouchableOpacity>
@@ -979,6 +976,7 @@ export const ChatExpenseTab: React.FC<ChatExpenseTabProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: ThemeColors.canvas,
   },
   headerContainer: {
     paddingHorizontal: 20,
@@ -994,9 +992,11 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backgroundColor: ThemeColors.card,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -1010,19 +1010,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: ThemeColors.primarySoft,
     borderWidth: 1,
-    borderColor: 'rgba(147, 51, 234, 0.15)',
-    shadowColor: '#9333EA',
+    borderColor: ThemeColors.primaryBorder,
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
   },
   stepProgressText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#9333EA',
+    color: ThemeColors.primary,
     letterSpacing: 0.8,
   },
   stepDotsRow: {
@@ -1035,14 +1035,14 @@ const styles = StyleSheet.create({
     width: 20,
     height: 3.5,
     borderRadius: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    backgroundColor: ThemeColors.border,
   },
   stepDotActive: {
-    backgroundColor: '#C084FC',
+    backgroundColor: ThemeColors.primaryBorder,
   },
   stepDotCurrent: {
     width: 32,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
   },
   scrollContent: {
     paddingTop: 24,
@@ -1054,17 +1054,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   questionTitle: {
-    fontSize: 29,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 28,
+    color: ThemeColors.textPrimary,
     textAlign: 'center',
     letterSpacing: -0.6,
-    lineHeight: 36,
+    lineHeight: 34,
   },
   questionSubtitle: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
   },
@@ -1072,23 +1072,23 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   expoCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
+    backgroundColor: ThemeColors.card,
+    borderRadius: 24,
     padding: 22,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 232, 240, 0.8)',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3,
   },
   receiptCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 24,
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.08,
@@ -1101,24 +1101,24 @@ const styles = StyleSheet.create({
   },
   categoryAmountBadge: {
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 14,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   categoryAmountLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.8,
   },
   categoryAmountVal: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 19,
+    color: ThemeColors.textPrimary,
     marginTop: 2,
   },
   categoriesGrid: {
@@ -1130,19 +1130,19 @@ const styles = StyleSheet.create({
   },
   categoryTile: {
     width: '47.5%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 18,
+    backgroundColor: ThemeColors.surface,
+    borderRadius: 16,
     padding: 12,
-    borderWidth: 1.5,
-    borderColor: '#F1F5F9',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     position: 'relative',
   },
   categoryTileSelected: {
-    borderColor: '#9333EA',
-    backgroundColor: '#FAF5FF',
+    borderColor: ThemeColors.primary,
+    backgroundColor: ThemeColors.primarySoft,
   },
   categoryTileIconBox: {
     width: 38,
@@ -1152,9 +1152,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   categoryTileName: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#1E293B',
+    color: ThemeColors.textPrimary,
     flex: 1,
   },
   categoryTileCheck: {
@@ -1164,7 +1164,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1177,10 +1177,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     padding: 10,
     borderRadius: 14,
     marginBottom: 14,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   miniBadge: {
     paddingHorizontal: 10,
@@ -1188,13 +1190,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   miniBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 12,
-    fontWeight: '700',
   },
   miniAmountText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: AppFonts.outfit.bold,
+    fontSize: 16,
+    color: ThemeColors.textPrimary,
   },
   timeChipsList: {
     gap: 8,
@@ -1206,13 +1208,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1.5,
-    borderColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   timeChipItemSelected: {
-    backgroundColor: '#FAF5FF',
-    borderColor: '#9333EA',
+    backgroundColor: ThemeColors.primarySoft,
+    borderColor: ThemeColors.primary,
   },
   timeChipLeft: {
     flexDirection: 'row',
@@ -1220,26 +1222,26 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timeChipText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   timeChipTextSelected: {
-    color: '#9333EA',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   timeCheckCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sectionMiniLabel: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.8,
     marginBottom: 8,
   },
@@ -1257,40 +1259,41 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 8,
     borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   dateChipSelected: {
-    backgroundColor: '#FAF5FF',
-    borderColor: '#9333EA',
+    backgroundColor: ThemeColors.primarySoft,
+    borderColor: ThemeColors.primary,
   },
   dateChipText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   dateChipTextSelected: {
-    color: '#9333EA',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   timeContinueBtn: {
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
     marginTop: 18,
-    shadowColor: '#9333EA',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
   },
   timeContinueBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1301,24 +1304,24 @@ const styles = StyleSheet.create({
   inputPillBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 16,
     paddingHorizontal: 14,
     height: 48,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     marginBottom: 16,
   },
   reasonInput: {
     flex: 1,
+    fontFamily: AppFonts.inter.medium,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   quickTagsTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
+    color: ThemeColors.textMuted,
     letterSpacing: 0.8,
     marginBottom: 10,
   },
@@ -1332,22 +1335,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: 'transparent',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   reasonSugChipSelected: {
-    backgroundColor: '#FAF5FF',
-    borderColor: '#9333EA',
+    backgroundColor: ThemeColors.primarySoft,
+    borderColor: ThemeColors.primary,
   },
   reasonSugText: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 12,
-    fontWeight: '600',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   reasonSugTextSelected: {
-    color: '#9333EA',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   reasonActionsRow: {
     flexDirection: 'row',
@@ -1359,28 +1362,30 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   skipBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
   },
   reasonNextBtn: {
     flex: 1,
     height: 48,
     borderRadius: 14,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
   },
   reasonNextBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
   },
 
@@ -1389,17 +1394,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 14,
     right: 14,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     borderRadius: 30,
     padding: 6,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 232, 240, 0.9)',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.1,
     shadowRadius: 18,
     elevation: 10,
     zIndex: 50,
@@ -1408,10 +1413,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#9333EA',
+    shadowColor: ThemeColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -1422,35 +1427,35 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#C084FC',
+    backgroundColor: '#FED7AA',
   },
   floatingInputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     borderRadius: 22,
     paddingHorizontal: 14,
     height: 44,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.borderSubtle,
   },
   floatingTextInput: {
     flex: 1,
+    fontFamily: AppFonts.inter.regular,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
   },
   floatingSendBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#9333EA',
+    backgroundColor: ThemeColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 6,
   },
   floatingSendBtnDisabled: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.border,
   },
 });

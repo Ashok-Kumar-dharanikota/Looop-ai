@@ -8,30 +8,59 @@ import Animated, {
   FadeOutUp,
   LinearTransition,
 } from 'react-native-reanimated';
-import { ChevronDown } from 'lucide-react-native';
+import {
+  ChevronDown,
+  Utensils,
+  Car,
+  ShoppingBag,
+  CreditCard,
+  Film,
+  Coffee,
+  Plane,
+  HeartPulse,
+  Wallet,
+} from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '@/store';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Food & Dining': '#FF5252',
-  'Transport': '#00B8D9',
-  'Shopping': '#FFAB00',
+  'Food & Dining': '#EF4444',
+  'Food': '#EF4444',
+  'Transport': '#0284C7',
+  'Shopping': '#F59E0B',
   'Bills': '#7C3AED',
-  'Income': '#10B981',
+  'Bills & Utilities': '#7C3AED',
   'Entertainment': '#EC4899',
-  'Health': '#3B82F6',
+  'Health & Care': '#14B8A6',
+  'Health': '#14B8A6',
+  'Groceries & Cafe': '#10B981',
+  'Groceries': '#10B981',
+  'Travel & Trips': '#4F46E5',
+  'Travel': '#4F46E5',
 };
 
-const getCatColor = (cat: string) => CATEGORY_COLORS[cat] || '#8B5CF6';
+const getCatColor = (cat: string) => CATEGORY_COLORS[cat] || ThemeColors.primary;
 
-export interface Transaction {
+export const getCategoryIconComp = (category: string) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('food') || cat.includes('dining')) return Utensils;
+  if (cat.includes('transport') || cat.includes('commute') || cat.includes('cab') || cat.includes('car')) return Car;
+  if (cat.includes('shopping')) return ShoppingBag;
+  if (cat.includes('bill') || cat.includes('utilit')) return CreditCard;
+  if (cat.includes('entertain') || cat.includes('movie')) return Film;
+  if (cat.includes('grocer') || cat.includes('cafe') || cat.includes('coffee')) return Coffee;
+  if (cat.includes('travel') || cat.includes('trip')) return Plane;
+  if (cat.includes('health') || cat.includes('care') || cat.includes('med')) return HeartPulse;
+  return Wallet;
+};
+
+export interface DailyTransactionItem {
   id: string;
   title: string;
   time: string;
   category: string;
   amount: number;
-  type: string;
-  icon: any;
 }
 
 export interface DailySummaryProps {
@@ -40,36 +69,9 @@ export interface DailySummaryProps {
     month: string;
     day: string;
   };
-  transactions: Transaction[];
+  transactions: DailyTransactionItem[];
   defaultExpanded?: boolean;
 }
-
-const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
-
-const AnimatedBar = ({ percentage, color }: { percentage: number, color: string }) => {
-  const height = useSharedValue(0);
-
-  React.useEffect(() => {
-    height.value = withTiming(Math.max(percentage, 8), { duration: 600 });
-  }, [percentage]);
-
-  const style = useAnimatedStyle(() => {
-    return {
-      height: `${height.value}%`,
-      width: '100%',
-      borderRadius: 4,
-    };
-  });
-
-  return (
-    <AnimatedGradient
-      colors={['#000000', '#00000080']}
-      style={style}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-    />
-  );
-};
 
 export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
   date = { month: 'AUG', day: '04' },
@@ -91,19 +93,14 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
   }));
 
   // Calculate totals and chart data
-  const { totalExpense, totalIncome, categoryData } = React.useMemo(() => {
+  const { totalExpense, categoryData } = React.useMemo(() => {
     let expenseSum = 0;
-    let incomeSum = 0;
     const catMap: Record<string, number> = {};
 
     transactions.forEach((t) => {
-      if (t.type === 'expense') {
-        const amt = Math.abs(t.amount);
-        expenseSum += amt;
-        catMap[t.category] = (catMap[t.category] || 0) + amt;
-      } else {
-        incomeSum += Math.abs(t.amount);
-      }
+      const amt = Math.abs(t.amount);
+      expenseSum += amt;
+      catMap[t.category] = (catMap[t.category] || 0) + amt;
     });
 
     const chart = Object.entries(catMap).map(([name, amount]) => ({
@@ -113,7 +110,7 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
       color: getCatColor(name),
     }));
 
-    return { totalExpense: expenseSum, totalIncome: incomeSum, categoryData: chart };
+    return { totalExpense: expenseSum, categoryData: chart };
   }, [transactions]);
 
   // Find category with highest spend
@@ -122,20 +119,15 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
       ? categoryData.reduce((prev, current) => (prev.amount > current.amount ? prev : current)).name
       : '';
 
-  const summaryHeading =
-    totalExpense > 0
-      ? `${currencySymbol}${totalExpense.toLocaleString('en-IN')}`
-      : totalIncome > 0
-      ? `+${currencySymbol}${totalIncome.toLocaleString('en-IN')}`
-      : `${currencySymbol}0`;
+  const summaryHeading = `${currencySymbol}${totalExpense.toLocaleString('en-IN')}`;
 
   const summarySubtitle = maxCat
     ? `${transactions.length} ${transactions.length === 1 ? 'entry' : 'entries'} • Highest on ${maxCat}`
-    : totalIncome > 0
-    ? `${transactions.length} credit ${transactions.length === 1 ? 'entry' : 'entries'}`
+    : transactions.length > 0
+    ? `${transactions.length} ${transactions.length === 1 ? 'entry' : 'entries'}`
     : 'No transactions';
 
-  const headingColor = totalExpense > 0 ? '#EF4444' : totalIncome > 0 ? '#10B981' : '#0F172A';
+  const headingColor = totalExpense > 0 ? ThemeColors.rose : ThemeColors.textPrimary;
 
   return (
     <Animated.View layout={LinearTransition.duration(250)} style={styles.container}>
@@ -161,12 +153,12 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
 
         <View style={styles.iconContainer}>
           <Animated.View style={[styles.chevronBadge, animatedChevronStyle]}>
-            <ChevronDown size={16} color="#64748B" strokeWidth={2.5} />
+            <ChevronDown size={16} color={ThemeColors.textSecondary} strokeWidth={2.5} />
           </Animated.View>
         </View>
       </TouchableOpacity>
 
-      {/* Expanded Content */}
+      {/* Expandable Section */}
       {expanded && (
         <Animated.View
           entering={FadeInDown.duration(280).springify()}
@@ -174,7 +166,7 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
           layout={LinearTransition.duration(250)}
           style={styles.dropdownContent}
         >
-          {/* Multi-Segment Proportion Bar */}
+          {/* Segmented Category Proportion Bar */}
           {categoryData.length > 0 && (
             <View style={styles.chartSection}>
               <View style={styles.segmentBarWrapper}>
@@ -184,20 +176,18 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
                     style={[
                       styles.segmentBarPart,
                       {
-                        flex: Math.max(cat.percentage, 5),
                         backgroundColor: cat.color,
-                        borderTopLeftRadius: idx === 0 ? 5 : 0,
-                        borderBottomLeftRadius: idx === 0 ? 5 : 0,
-                        borderTopRightRadius: idx === categoryData.length - 1 ? 5 : 0,
-                        borderBottomRightRadius: idx === categoryData.length - 1 ? 5 : 0,
+                        flex: cat.percentage || 1,
+                        marginRight: idx < categoryData.length - 1 ? 2 : 0,
                       },
                     ]}
                   />
                 ))}
               </View>
 
+              {/* Category Chips List */}
               <View style={styles.categoryPillsRow}>
-                {categoryData.slice(0, 3).map((cat) => (
+                {categoryData.map((cat) => (
                   <View key={cat.name} style={styles.catMiniChip}>
                     <View style={[styles.catDot, { backgroundColor: cat.color }]} />
                     <Text style={styles.catMiniChipName} numberOfLines={1}>
@@ -215,13 +205,9 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
           {/* Transaction List */}
           <View style={styles.listContainer}>
             {transactions.map((item, idx) => {
-              const IconComp = item.icon;
-              const isIncome = item.type === 'income';
-              const formattedAmount = isIncome
-                ? `+${currencySymbol}${item.amount.toLocaleString('en-IN')}`
-                : `-${currencySymbol}${Math.abs(item.amount).toLocaleString('en-IN')}`;
-
-              const itemColor = isIncome ? '#10B981' : getCatColor(item.category);
+              const IconComp = getCategoryIconComp(item.category);
+              const formattedAmount = `-${currencySymbol}${Math.abs(item.amount).toLocaleString('en-IN')}`;
+              const itemColor = getCatColor(item.category);
               const itemBgColor = `${itemColor}15`;
 
               const cleanTime = item.time.includes(',') ? item.time.split(', ').pop() : item.time;
@@ -248,12 +234,7 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
                       </Text>
                     </View>
 
-                    <Text
-                      style={[
-                        styles.txAmount,
-                        { color: isIncome ? '#10B981' : '#0F172A' },
-                      ]}
-                    >
+                    <Text style={styles.txAmount}>
                       {formattedAmount}
                     </Text>
                   </View>
@@ -269,10 +250,10 @@ export const DailySummary: React.FC<DailySummaryProps> = React.memo(({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    borderRadius: 18,
+    backgroundColor: ThemeColors.card,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
+    borderRadius: 20,
     marginHorizontal: 16,
     marginBottom: 12,
     overflow: 'hidden',
@@ -280,38 +261,38 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 8,
-    elevation: 1.5,
+    elevation: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     minHeight: 44,
   },
   dateTimeline: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: ThemeColors.surface,
+    borderRadius: 14,
     paddingVertical: 8,
     paddingHorizontal: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: ThemeColors.borderSubtle,
   },
   monthText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#7C3AED',
+    fontFamily: AppFonts.jakarta.bold,
+    fontSize: 10.5,
+    color: ThemeColors.primary,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   dayText: {
+    fontFamily: AppFonts.outfit.extraBold,
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     marginTop: 1,
   },
   summaryContent: {
@@ -319,16 +300,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   summaryTitle: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 17,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     marginBottom: 2,
     fontVariant: ['tabular-nums'],
   },
   summaryMessage: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    fontFamily: AppFonts.inter.regular,
+    fontSize: 12.5,
+    color: ThemeColors.textSecondary,
   },
   iconContainer: {
     paddingLeft: 8,
@@ -339,19 +320,19 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: ThemeColors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: ThemeColors.borderSubtle,
   },
   dropdownContent: {
     paddingHorizontal: 16,
     paddingBottom: 16,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F8FAFC',
-    backgroundColor: '#FAFAFC',
+    borderTopColor: ThemeColors.borderSubtle,
+    backgroundColor: ThemeColors.surface,
   },
   chartSection: {
     marginBottom: 12,
@@ -361,7 +342,7 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 5,
     overflow: 'hidden',
-    backgroundColor: '#E2E8F0',
+    backgroundColor: ThemeColors.border,
     gap: 2,
   },
   segmentBarPart: {
@@ -376,12 +357,12 @@ const styles = StyleSheet.create({
   catMiniChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.card,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: ThemeColors.border,
     gap: 5,
   },
   catDot: {
@@ -390,14 +371,14 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   catMiniChipName: {
+    fontFamily: AppFonts.jakarta.semiBold,
     fontSize: 11,
-    fontWeight: '600',
-    color: '#475569',
+    color: ThemeColors.textSecondary,
   },
   catMiniChipAmt: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     fontVariant: ['tabular-nums'],
   },
   listContainer: {
@@ -417,24 +398,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   txTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#0F172A',
+    fontFamily: AppFonts.jakarta.semiBold,
+    fontSize: 14.5,
+    color: ThemeColors.textPrimary,
   },
   txSub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 12,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   txAmount: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 15,
-    fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   txDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.borderSubtle,
     marginVertical: 2,
   },
 });

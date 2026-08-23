@@ -69,11 +69,11 @@ export const AnimatedMeshGradient: React.FC<AnimatedMeshGradientProps> = ({
     { scale: mix(progress3.value, 1.1, 0.8) },
   ]);
 
-  // Color scheme: Dreamy modern pastel mesh with rich violet, indigo, soft emerald & warm gold
-  const blob1Color = intensity === 'vibrant' ? '#DDD6FE' : '#EDE9FE'; // Soft Violet
-  const blob2Color = intensity === 'vibrant' ? '#C7D2FE' : '#E0E7FF'; // Soft Indigo
+  // Color scheme: Harmonized with warm linen canvas (#FAF9F6), sunset amber, soft violet, and soft emerald
+  const blob1Color = intensity === 'vibrant' ? '#FED7AA' : '#FFEDD5'; // Warm Sunset Amber
+  const blob2Color = intensity === 'vibrant' ? '#DDD6FE' : '#EDE9FE'; // Soft Violet AI Accent
   const blob3Color = intensity === 'vibrant' ? '#A7F3D0' : '#D1FAE5'; // Soft Mint/Emerald
-  const blob4Color = intensity === 'vibrant' ? '#FDE68A' : '#FEF3C7'; // Warm Amber/Gold
+  const blob4Color = intensity === 'vibrant' ? '#FDE68A' : '#FEF3C7'; // Warm Gold/Linen
 
   return (
     <View style={[styles.container, { height }]}>
@@ -83,19 +83,19 @@ export const AnimatedMeshGradient: React.FC<AnimatedMeshGradientProps> = ({
           <SkiaLinearGradient
             start={vec(0, 0)}
             end={vec(SCREEN_WIDTH, height)}
-            colors={['#F5F3FF', '#EEF2FF', '#F0FDF4', '#FAFAFC']}
+            colors={['#FFF7ED', '#FAF9F6', '#ECFDF5', '#FAF9F6']}
           />
         </Rect>
 
         <Group>
           <BlurMask blur={55} style="normal" />
 
-          {/* Violet Blob */}
+          {/* Amber Blob */}
           <Group transform={transformBlob1}>
             <Oval x={-50} y={-40} width={SCREEN_WIDTH * 0.75} height={220} color={blob1Color} />
           </Group>
 
-          {/* Indigo Blob */}
+          {/* Violet Blob */}
           <Group transform={transformBlob2}>
             <Oval x={SCREEN_WIDTH * 0.35} y={-60} width={SCREEN_WIDTH * 0.7} height={240} color={blob2Color} />
           </Group>
@@ -105,7 +105,7 @@ export const AnimatedMeshGradient: React.FC<AnimatedMeshGradientProps> = ({
             <Oval x={-30} y={80} width={SCREEN_WIDTH * 0.65} height={200} color={blob3Color} />
           </Group>
 
-          {/* Warm Amber Blob */}
+          {/* Warm Gold Blob */}
           <Group transform={transformBlob4}>
             <Oval x={SCREEN_WIDTH * 0.4} y={100} width={SCREEN_WIDTH * 0.55} height={180} color={blob4Color} />
           </Group>

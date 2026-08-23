@@ -25,9 +25,10 @@ import {
   Utensils,
   X,
 } from 'lucide-react-native';
-import { DailySummary, Transaction } from './DailySummary';
+import { DailySummary, DailyTransactionItem } from './DailySummary';
 import { useTransactions } from '@/hooks/use-database';
 import { useAppStore } from '@/store';
+import { ThemeColors, AppFonts } from '@/constants/theme';
 
 const CATEGORIES = [
   { name: 'All', icon: LayoutGrid },
@@ -37,40 +38,20 @@ const CATEGORIES = [
   { name: 'Bills', icon: CreditCard },
   { name: 'Groceries', icon: Coffee },
   { name: 'Entertainment', icon: Film },
-  { name: 'Income', icon: ArrowDownLeft },
+  { name: 'Health', icon: HeartPulse },
+  { name: 'Travel', icon: Plane },
 ];
 
-const getIconComponent = (iconName: string) => {
-  switch (iconName) {
-    case 'Utensils':
-      return Utensils;
-    case 'Car':
-      return Car;
-    case 'ShoppingBag':
-      return ShoppingBag;
-    case 'CreditCard':
-      return CreditCard;
-    case 'Film':
-      return Film;
-    case 'Coffee':
-      return Coffee;
-    case 'Plane':
-      return Plane;
-    case 'HeartPulse':
-      return HeartPulse;
-    case 'ArrowDownLeft':
-      return ArrowDownLeft;
-    default:
-      return Utensils;
+const formatGroupDate = (dateString: string) => {
+  try {
+    const d = new Date(dateString);
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const month = months[d.getMonth()] || 'AUG';
+    const day = String(d.getDate()).padStart(2, '0');
+    return { month, day };
+  } catch {
+    return { month: 'AUG', day: '01' };
   }
-};
-
-const formatGroupDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  const month = months[d.getMonth()] || 'AUG';
-  const day = String(d.getDate()).padStart(2, '0');
-  return { month, day };
 };
 
 interface GroupItem {
@@ -78,7 +59,7 @@ interface GroupItem {
   dateStr: string;
   date: { month: string; day: string };
   defaultExpanded: boolean;
-  transactions: Transaction[];
+  transactions: DailyTransactionItem[];
 }
 
 export const TransactionsTab: React.FC = () => {
@@ -92,7 +73,7 @@ export const TransactionsTab: React.FC = () => {
   // Group transactions by date
   const allGroups = useMemo<GroupItem[]>(() => {
     const txSource = dbTransactions || [];
-    const groupsMap = new Map<string, Transaction[]>();
+    const groupsMap = new Map<string, DailyTransactionItem[]>();
 
     txSource.forEach((tx) => {
       const dateKey = tx.date || (tx.createdAt ? tx.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]);
@@ -101,12 +82,10 @@ export const TransactionsTab: React.FC = () => {
       }
       groupsMap.get(dateKey)!.push({
         id: tx.id,
-        title: tx.title,
+        title: tx.description || tx.category,
         time: tx.timestamp,
         category: tx.category,
-        amount: tx.type === 'expense' ? -Math.abs(tx.amount) : Math.abs(tx.amount),
-        type: tx.type,
-        icon: getIconComponent(tx.icon),
+        amount: tx.amount,
       });
     });
 
@@ -128,7 +107,10 @@ export const TransactionsTab: React.FC = () => {
     return allGroups
       .map((group) => {
         const matchingTxs = group.transactions.filter((t) => {
-          const matchesSearch = !query || t.title.toLowerCase().includes(query) || t.category.toLowerCase().includes(query);
+          const matchesSearch =
+            !query ||
+            (t.title ? t.title.toLowerCase().includes(query) : false) ||
+            t.category.toLowerCase().includes(query);
           const matchesCat =
             selectedCat === 'All' ||
             t.category.toLowerCase().includes(selectedCat.toLowerCase());
@@ -149,9 +131,7 @@ export const TransactionsTab: React.FC = () => {
     let spend = 0;
     let count = 0;
     (dbTransactions || []).forEach((t) => {
-      if (t.type === 'expense') {
-        spend += Math.abs(t.amount);
-      }
+      spend += Math.abs(t.amount);
       count++;
     });
     return { totalMonthlySpend: spend, totalTxCount: count };
@@ -181,18 +161,18 @@ export const TransactionsTab: React.FC = () => {
             </Text>
           </View>
           <View style={styles.statsBadge}>
-            <Sparkles size={13} color="#7C3AED" />
+            <Sparkles size={13} color={ThemeColors.primary} />
             <Text style={styles.statsBadgeText}>Live Sync</Text>
           </View>
         </View>
 
         {/* Search Input */}
         <View style={styles.searchBox}>
-          <Search size={17} color="#94A3B8" />
+          <Search size={17} color={ThemeColors.textMuted} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search merchants, notes, or tags..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={ThemeColors.textMuted}
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
@@ -203,7 +183,7 @@ export const TransactionsTab: React.FC = () => {
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.searchClearBtn}
             >
-              <X size={14} color="#64748B" />
+              <X size={14} color={ThemeColors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -229,7 +209,7 @@ export const TransactionsTab: React.FC = () => {
               >
                 <Icon
                   size={15}
-                  color={isSelected ? '#7C3AED' : '#64748B'}
+                  color={isSelected ? ThemeColors.primary : ThemeColors.textSecondary}
                   strokeWidth={isSelected ? 2.4 : 2}
                 />
                 <Text
@@ -246,7 +226,7 @@ export const TransactionsTab: React.FC = () => {
         </ScrollView>
       </View>
     );
-  }, [totalTxCount, totalMonthlySpend, search, selectedCat, handleCategoryPress]);
+  }, [totalTxCount, totalMonthlySpend, currencySymbol, search, selectedCat, handleCategoryPress]);
 
   // Render FlashList item
   const renderItem = useCallback(({ item }: { item: GroupItem }) => {
@@ -266,7 +246,7 @@ export const TransactionsTab: React.FC = () => {
     return (
       <View style={styles.emptyStateContainer}>
         <View style={styles.emptyIconCircle}>
-          <Receipt size={28} color="#94A3B8" />
+          <Receipt size={28} color={ThemeColors.textMuted} />
         </View>
         <Text style={styles.emptyStateTitle}>
           {isFiltered ? 'No matching transactions' : 'No transactions recorded yet'}
@@ -307,7 +287,7 @@ export const TransactionsTab: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFC',
+    backgroundColor: ThemeColors.canvas,
   },
   listContent: {
     paddingBottom: 40,
@@ -324,44 +304,44 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
+    fontFamily: AppFonts.outfit.bold,
     fontSize: 28,
-    fontWeight: '800',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     letterSpacing: -0.6,
   },
   subtitle: {
+    fontFamily: AppFonts.inter.medium,
     fontSize: 13,
-    fontWeight: '600',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 2,
   },
   statsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#FFF7ED',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E9D5FF',
+    borderColor: '#FFEDD5',
   },
   statsBadgeText: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 11,
-    fontWeight: '700',
-    color: '#7C3AED',
+    color: ThemeColors.primary,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    backgroundColor: ThemeColors.card,
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 10,
     marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
@@ -370,16 +350,16 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    fontFamily: AppFonts.jakarta.medium,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     padding: 0,
   },
   searchClearBtn: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -394,29 +374,29 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 14,
     minHeight: 36,
   },
   pillSelected: {
-    backgroundColor: '#F5F3FF',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.2,
+    borderColor: '#FFEDD5',
   },
   pillUnselected: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: ThemeColors.card,
+    borderWidth: 1.2,
+    borderColor: ThemeColors.border,
   },
   pillText: {
     fontSize: 13,
-    fontWeight: '600',
   },
   pillTextSelected: {
-    color: '#7C3AED',
-    fontWeight: '700',
+    fontFamily: AppFonts.jakarta.bold,
+    color: ThemeColors.primary,
   },
   pillTextUnselected: {
-    color: '#64748B',
+    fontFamily: AppFonts.jakarta.medium,
+    color: ThemeColors.textSecondary,
   },
   emptyStateContainer: {
     padding: 40,
@@ -428,21 +408,23 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: ThemeColors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: ThemeColors.borderSubtle,
   },
   emptyStateTitle: {
+    fontFamily: AppFonts.jakarta.bold,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
+    color: ThemeColors.textPrimary,
     textAlign: 'center',
   },
   emptyStateSub: {
+    fontFamily: AppFonts.inter.regular,
     fontSize: 13,
-    fontWeight: '500',
-    color: '#64748B',
+    color: ThemeColors.textSecondary,
     marginTop: 6,
     textAlign: 'center',
     lineHeight: 18,
@@ -453,11 +435,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 9,
     borderRadius: 12,
-    backgroundColor: '#0F172A',
+    backgroundColor: ThemeColors.textPrimary,
   },
   clearFiltersBtnText: {
+    fontFamily: AppFonts.jakarta.bold,
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
   },
 });

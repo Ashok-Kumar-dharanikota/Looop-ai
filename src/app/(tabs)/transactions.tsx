@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { TransactionsTab } from '@/components/tabs/TransactionsTab';
+import { ThemeColors } from '@/constants/theme';
 
 export default function TransactionsScreen() {
   return (
@@ -18,10 +19,11 @@ export default function TransactionsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.canvas,
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFC',
+    backgroundColor: ThemeColors.canvas,
   },
 });
+
