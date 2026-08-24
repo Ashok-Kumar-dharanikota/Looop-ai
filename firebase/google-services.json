@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "805090080128-vs94dgm2dhi9c7e34g55cr46hhg8dq0t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cornerstonestudio.looopai",
+            "certificate_hash": "e5b92ef9eded684963c1b5b770896ef8021eeecc"
+          }
+        },
+        {
           "client_id": "805090080128-n65h0obud7r7r30g02qhnf6uiidpu46f.apps.googleusercontent.com",
           "client_type": 3
         }
