@@ -92,6 +92,7 @@ export default function RootLayout() {
     // 2. Sync Firebase Auth state with global Zustand store & RevenueCat
     let wasPreviouslyAuthenticated = false;
     const unsubscribeAuth = subscribeToAuthState((firebaseUser) => {
+      const { isGuest } = useUserStore.getState();
       if (firebaseUser) {
         wasPreviouslyAuthenticated = true;
         useUserStore.getState().setUser({
@@ -102,7 +103,8 @@ export default function RootLayout() {
         });
         logInRevenueCat(firebaseUser.uid);
       } else {
-        if (wasPreviouslyAuthenticated) {
+        // Only clear store user if previously signed in with Firebase and NOT in Guest mode
+        if (wasPreviouslyAuthenticated && !isGuest) {
           useUserStore.getState().clearUser();
           logOutRevenueCat();
         }
@@ -144,11 +146,11 @@ export default function RootLayout() {
     async function prepare() {
       try {
         await initializeDatabase();
-        if (!__DEV__) {
+        if (!__DEV__ && Updates.isEnabled) {
           const update = await Updates.checkForUpdateAsync();
           if (update.isAvailable) {
+            // Silently fetch update so it applies seamlessly on the next cold launch
             await Updates.fetchUpdateAsync();
-            await Updates.reloadAsync();
           }
         }
       } catch (e) {

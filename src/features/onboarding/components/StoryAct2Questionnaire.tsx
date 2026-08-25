@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Dimensions,
+  BackHandler,
 } from 'react-native';
 import Animated, {
   FadeInRight,
@@ -375,14 +376,28 @@ export const StoryAct2Questionnaire: React.FC<StoryAct2QuestionnaireProps> = ({
     }
   };
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (currentStepIndex > 0) {
       Haptics.selectionAsync();
-      setCurrentStepIndex(currentStepIndex - 1);
+      setCurrentStepIndex((prev) => prev - 1);
     } else if (onBackToPrevious) {
       onBackToPrevious();
     }
-  };
+  }, [currentStepIndex, onBackToPrevious]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (currentStepIndex > 0) {
+        handlePrev();
+        return true;
+      }
+      // Keep on step 0 rather than popping to index and causing redirect loop
+      return true;
+    };
+
+    const backSubscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSubscription.remove();
+  }, [currentStepIndex, handlePrev]);
 
   const handleUpdateObligationAmount = (id: string, newAmtStr: string) => {
     const cleanNum = parseFloat(newAmtStr.replace(/[^0-9.]/g, '')) || 0;

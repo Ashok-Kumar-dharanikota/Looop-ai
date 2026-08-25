@@ -24,9 +24,11 @@ export function useAuthFlow() {
   const [isGuestInputFocused, setIsGuestInputFocused] = useState(false);
   const [guestInputError, setGuestInputError] = useState(false);
 
-  // Active user check
+  // Active user check (Guest state in MMKV is synchronous and active immediately)
+  const isGuestActive = isGuest || (isStoreAuth && !!storeUser && storeUser.isGuest);
   const isUserActive =
-    !isFbLoading && ((isFbAuth && !!fbUser) || (isStoreAuth && (!!storeUser || isGuest)));
+    isGuestActive ||
+    (!isFbLoading && ((isFbAuth && !!fbUser) || (isStoreAuth && !!storeUser)));
 
   const navigateNext = useCallback(() => {
     if (useAppStore.getState().hasCompletedOnboarding) {

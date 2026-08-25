@@ -1,4 +1,14 @@
 import {
+  GoogleAuthProvider,
+  signOut as fbSignOut,
+  getAuth,
+  onAuthStateChanged,
+  signInWithCredential,
+  type User as FirebaseUser,
+  type UserCredential,
+} from '@react-native-firebase/auth';
+import { Platform } from 'react-native';
+import {
   GoogleOneTapSignIn,
   isCancelledResponse,
   isErrorWithCode,
@@ -7,16 +17,6 @@ import {
   statusCodes,
   type OneTapUser as NitroGoogleUser,
 } from 'react-native-nitro-google-signin';
-import {
-  getAuth,
-  signInWithCredential,
-  GoogleAuthProvider,
-  signOut as fbSignOut,
-  onAuthStateChanged,
-  type User as FirebaseUser,
-  type UserCredential,
-} from '@react-native-firebase/auth';
-import { Platform } from 'react-native';
 
 export const GOOGLE_WEB_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
@@ -32,7 +32,7 @@ export function configureGoogleSignIn(): void {
 
   try {
     GoogleOneTapSignIn.configure({
-      webClientId: GOOGLE_WEB_CLIENT_ID,
+      webClientId: 'autoDetect', 
       offlineAccess: true,
     });
     isConfigured = true;
