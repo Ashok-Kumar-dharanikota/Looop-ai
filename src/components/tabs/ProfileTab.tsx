@@ -39,10 +39,15 @@ import { useUserStore, useAppStore } from '@/store';
 import { clearAllUserData } from '@/db';
 import { useTransactions } from '@/hooks/use-database';
 import { queryClient } from '@/lib/query-client';
-import { restorePurchases, presentCustomerCenterModal } from '@/services/purchases';
+import {
+  restorePurchases,
+  presentCustomerCenterModal,
+  logOutRevenueCat,
+} from '@/services/purchases';
 import { FinancialProfileModal } from '@/components/profile/FinancialProfileModal';
 import { SecuritySettingsModal } from '@/components/profile/SecuritySettingsModal';
 import { NotificationsSettingsModal } from '@/components/profile/NotificationsSettingsModal';
+import { EmailAuthModal } from '@/components/profile/EmailAuthModal';
 import { ThemeColors, AppFonts } from '@/constants/theme';
 
 export const ProfileTab: React.FC = () => {
@@ -62,32 +67,14 @@ export const ProfileTab: React.FC = () => {
   const [showFinancialModal, setShowFinancialModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showEmailAuthModal, setShowEmailAuthModal] = useState(false);
 
   const isAuthenticated = isFbAuth || isStoreAuth;
   const isGuestUser = isGuest || (!isAuthenticated && !fbUser);
 
-  const handleUpgradeGuestAccount = async () => {
+  const handleUpgradeGuestAccount = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    try {
-      const result = await signInWithGoogle();
-      if (result.success) {
-        useUserStore.getState().setUser({
-          uid: result.firebaseUser.uid,
-          email: result.firebaseUser.email || result.googleUser?.email || null,
-          displayName: result.firebaseUser.displayName || result.googleUser?.name || null,
-          photoURL: result.firebaseUser.photoURL || result.googleUser?.photo || null,
-        });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert(
-          'Account Linked! 🎉',
-          `Welcome, ${result.firebaseUser.displayName || 'User'}! Your expenses and insights are now linked to your Google Account with cloud sync.`
-        );
-      } else if (!result.cancelled && result.error) {
-        Alert.alert('Sign-In Notice', result.error);
-      }
-    } catch (err: any) {
-      Alert.alert('Sign-In Error', err?.message || 'Unable to connect Google account. Please try again.');
-    }
+    setShowEmailAuthModal(true);
   };
 
   const handleSignOut = () => {
@@ -97,9 +84,15 @@ export const ProfileTab: React.FC = () => {
         text: 'Sign Out',
         style: 'destructive',
         onPress: async () => {
-          clearUser();
-          await signOut();
-          router.replace('/' as any);
+          try {
+            clearUser();
+            queryClient.clear();
+            await Promise.allSettled([signOut(), logOutRevenueCat()]);
+          } catch (err) {
+            console.warn('Sign out warning:', err);
+          } finally {
+            router.replace('/' as any);
+          }
         },
       },
     ]);
@@ -256,7 +249,6 @@ export const ProfileTab: React.FC = () => {
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={handleUpgradeGuestAccount}
-          disabled={isSigningIn}
         >
           <LinearGradient
             colors={['#38BDF8', '#0284C7']}
@@ -265,21 +257,15 @@ export const ProfileTab: React.FC = () => {
             style={styles.signInBanner}
           >
             <View style={styles.signInIconBox}>
-              {isSigningIn ? (
-                <ActivityIndicator size="small" color="#0EA5E9" />
-              ) : (
-                <UserPlus size={20} color="#0EA5E9" />
-              )}
+              <UserPlus size={20} color="#0EA5E9" />
             </View>
             <View style={styles.signInContent}>
-              <Text style={styles.signInTitle}>
-                {isSigningIn ? 'Signing in with Google...' : 'Create an Account'}
-              </Text>
+              <Text style={styles.signInTitle}>Create an Account</Text>
               <Text style={styles.signInSub}>
-                {isSigningIn ? 'Connecting your account...' : 'Tap to sign in with Google & sync data'}
+                Tap to sign in with email & sync your data
               </Text>
             </View>
-            {!isSigningIn && <ChevronRight size={18} color="#FFFFFF" />}
+            <ChevronRight size={18} color="#FFFFFF" />
           </LinearGradient>
         </TouchableOpacity>
       )}
@@ -552,6 +538,11 @@ export const ProfileTab: React.FC = () => {
       <NotificationsSettingsModal
         visible={showNotificationsModal}
         onClose={() => setShowNotificationsModal(false)}
+      />
+
+      <EmailAuthModal
+        visible={showEmailAuthModal}
+        onClose={() => setShowEmailAuthModal(false)}
       />
 
       <View style={styles.versionContainer}>

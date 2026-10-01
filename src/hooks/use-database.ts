@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import {
   useTransactionsQuery,
+  useRecentTransactionsQuery,
+  useTodayExpensesQuery,
   useAddTransactionMutation,
   useDeleteTransactionMutation,
   useAIReportsQuery,
@@ -11,6 +13,7 @@ import {
   useAddVaultMutation,
   useDeleteVaultMutation,
   useWeeklyGoalsQuery,
+  useSavingsChartDataQuery,
   useToggleGoalMutation,
   useAddGoalMutation,
   useDeleteGoalMutation,
@@ -73,6 +76,48 @@ export function useTransactions() {
     refresh: () => refetch(),
     addTransaction: (newTx: NewTransaction) => addMutation.mutateAsync(newTx),
     deleteTransaction: (id: string) => deleteMutation.mutateAsync(id),
+  };
+}
+
+/**
+ * Hook for querying recent transactions with a limit, avoiding unwanted data fetching
+ */
+export function useRecentTransactions(limit: number = 20) {
+  const { data = [], isLoading, isFetching, refetch } = useRecentTransactionsQuery(limit);
+  return {
+    transactions: data,
+    loading: isLoading,
+    isFetching,
+    refresh: () => refetch(),
+  };
+}
+
+/**
+ * Hook for querying today's total spending directly from SQLite
+ */
+export function useTodayExpenses(todayDate: string) {
+  const { data = 0, isLoading, isFetching, refetch } = useTodayExpensesQuery(todayDate);
+  return {
+    totalToday: data,
+    loading: isLoading,
+    isFetching,
+    refresh: () => refetch(),
+  };
+}
+
+/**
+ * Hook for querying real savings data from SQLite needed for the Area Chart & balance
+ */
+export function useSavingsChartData() {
+  const { data, isLoading, isFetching, refetch } = useSavingsChartDataQuery();
+  return {
+    completedGoals: data?.completedGoals || [],
+    completedTasksCount: data?.completedTasksCount || 0,
+    totalSavedTillNow: data?.totalSavedTillNow || 0,
+    pendingGoalSavings: data?.pendingGoalSavings || 0,
+    loading: isLoading,
+    isFetching,
+    refresh: () => refetch(),
   };
 }
 

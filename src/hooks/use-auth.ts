@@ -3,10 +3,14 @@ import type { User as FirebaseUser } from '@react-native-firebase/auth';
 import {
   getCurrentUser,
   signInWithGoogleOAuth,
+  signInWithEmailPassword,
+  signUpWithEmailPassword,
+  sendPasswordReset as authSendPasswordReset,
   signOut as authSignOut,
   deleteCurrentUser,
   subscribeToAuthState,
   type GoogleSignInResult,
+  type EmailAuthResult,
 } from '@/services/auth';
 
 export function useAuth() {
@@ -24,6 +28,39 @@ export function useAuth() {
       unsubscribe();
     };
   }, []);
+
+  const signInWithEmail = useCallback(
+    async (email: string, pass: string): Promise<EmailAuthResult> => {
+      setIsSigningIn(true);
+      try {
+        const result = await signInWithEmailPassword(email, pass);
+        return result;
+      } finally {
+        setIsSigningIn(false);
+      }
+    },
+    []
+  );
+
+  const signUpWithEmail = useCallback(
+    async (email: string, pass: string, displayName?: string): Promise<EmailAuthResult> => {
+      setIsSigningIn(true);
+      try {
+        const result = await signUpWithEmailPassword(email, pass, displayName);
+        return result;
+      } finally {
+        setIsSigningIn(false);
+      }
+    },
+    []
+  );
+
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ success: boolean; error?: string }> => {
+      return await authSendPasswordReset(email);
+    },
+    []
+  );
 
   const signInWithGoogle = useCallback(async (): Promise<GoogleSignInResult> => {
     setIsSigningIn(true);
@@ -60,6 +97,9 @@ export function useAuth() {
     isLoading,
     isSigningIn,
     isAuthenticated: !!user,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
     signInWithGoogle,
     signOut,
     deleteAccount,

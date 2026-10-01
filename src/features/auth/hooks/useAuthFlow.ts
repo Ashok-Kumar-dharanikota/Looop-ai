@@ -13,6 +13,9 @@ export function useAuthFlow() {
     user: fbUser,
     isLoading: isFbLoading,
     isAuthenticated: isFbAuth,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
     signInWithGoogle,
     isSigningIn,
   } = useAuth();
@@ -91,6 +94,19 @@ export function useAuthFlow() {
     [guestInputError]
   );
 
+  const handleAuthSuccess = useCallback(
+    (firebaseUser: any) => {
+      useUserStore.getState().setUser({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || null,
+        displayName: firebaseUser.displayName || null,
+        photoURL: firebaseUser.photoURL || null,
+      });
+      navigateNext();
+    },
+    [navigateNext]
+  );
+
   return {
     isUserActive,
     hasCompletedOnboarding,
@@ -104,5 +120,9 @@ export function useAuthFlow() {
     setGuestInputError,
     handleGuestContinue,
     handleGoogleSignIn,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
+    handleAuthSuccess,
   };
 }

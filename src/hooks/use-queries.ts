@@ -40,6 +40,38 @@ export function useTransactionsQuery() {
   });
 }
 
+/**
+ * Fetch only the most recent transactions with a limit to avoid pulling unwanted historical data
+ */
+export function useRecentTransactionsQuery(limit: number = 20) {
+  return useQuery({
+    queryKey: queryKeys.transactions.list({ limit }),
+    queryFn: async (): Promise<Transaction[]> => {
+      return db
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.date), desc(transactions.timestamp))
+        .limit(limit);
+    },
+  });
+}
+
+/**
+ * Fetch only today's expenses sum directly from SQLite
+ */
+export function useTodayExpensesQuery(todayDate: string) {
+  return useQuery({
+    queryKey: queryKeys.transactions.list({ date: todayDate, type: 'todayTotal' }),
+    queryFn: async (): Promise<number> => {
+      const rows = await db
+        .select({ amount: transactions.amount })
+        .from(transactions)
+        .where(eq(transactions.date, todayDate));
+      return rows.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+    },
+  });
+}
+
 export function useAddTransactionMutation() {
   const queryClient = useQueryClient();
 
@@ -199,6 +231,63 @@ export function useWeeklyGoalsQuery() {
         .select()
         .from(weeklyGoals)
         .orderBy(desc(weeklyGoals.createdAt));
+    },
+  });
+}
+
+/**
+ * Fetch real savings data needed for the Area Chart and Home balance,
+ * querying only the required columns and completed/pending goals without unwanted data.
+ */
+export function useSavingsChartDataQuery() {
+  return useQuery({
+    queryKey: [...queryKeys.weeklyGoals.lists(), 'savingsChartData'],
+    queryFn: async () => {
+      const completedGoals = await db
+        .select({
+          id: weeklyGoals.id,
+          savingsAmount: weeklyGoals.savingsAmount,
+          completedAt: weeklyGoals.completedAt,
+          createdAt: weeklyGoals.createdAt,
+        })
+        .from(weeklyGoals)
+        .where(eq(weeklyGoals.completed, true));
+
+      const pendingGoals = await db
+        .select({
+          id: weeklyGoals.id,
+          savingsAmount: weeklyGoals.savingsAmount,
+        })
+        .from(weeklyGoals)
+        .where(eq(weeklyGoals.completed, false));
+
+      const vaultRows = await db
+        .select({
+          id: milestoneVaults.id,
+          currentAmount: milestoneVaults.currentAmount,
+        })
+        .from(milestoneVaults);
+
+      const vaultSum = vaultRows.reduce(
+        (sum, v) => sum + (v.currentAmount || 0),
+        0
+      );
+      const taskSavingsSum = completedGoals.reduce(
+        (sum, g) => sum + (g.savingsAmount || 0),
+        0
+      );
+      const totalSavedTillNow = vaultSum > 0 ? vaultSum : taskSavingsSum;
+      const pendingGoalSavings = pendingGoals.reduce(
+        (sum, g) => sum + (g.savingsAmount || 0),
+        0
+      );
+
+      return {
+        completedGoals,
+        completedTasksCount: completedGoals.length,
+        totalSavedTillNow,
+        pendingGoalSavings,
+      };
     },
   });
 }

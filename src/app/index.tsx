@@ -12,9 +12,9 @@ export default function IndexScreen() {
 
   // Instant check for guest or persistent store user from MMKV
   const isGuestActive = isGuest || (isStoreAuth && !!storeUser && storeUser.isGuest);
-  const isGoogleActive = (isFbAuth && !!fbUser) || (isStoreAuth && !!storeUser && !storeUser.isGuest);
+  const isUserActive = isStoreAuth && !!storeUser && !storeUser.isGuest;
 
-  if (isGuestActive || isGoogleActive) {
+  if (isGuestActive || isUserActive) {
     return (
       <Redirect
         href={hasCompletedOnboarding ? ('/(tabs)' as any) : ('/onboarding' as any)}
@@ -23,7 +23,7 @@ export default function IndexScreen() {
   }
 
   // If still checking Firebase for existing session on cold start, keep blank splash screen
-  if (isFbLoading) {
+  if (isFbLoading && isFbAuth && !!fbUser) {
     return <View style={styles.fallbackContainer} />;
   }
 

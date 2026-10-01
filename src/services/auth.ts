@@ -4,6 +4,10 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithCredential,
+  signInWithEmailAndPassword as fbSignInWithEmail,
+  createUserWithEmailAndPassword as fbCreateUserWithEmail,
+  sendPasswordResetEmail as fbSendPasswordResetEmail,
+  updateProfile,
   type User as FirebaseUser,
   type UserCredential,
 } from '@react-native-firebase/auth';
@@ -17,6 +21,138 @@ import {
   statusCodes,
   type OneTapUser as NitroGoogleUser,
 } from 'react-native-nitro-google-signin';
+
+/**
+ * Maps Firebase Auth error codes to user-friendly messages.
+ */
+export function mapFirebaseAuthError(error: any): string {
+  const code = error?.code || '';
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'An account already exists with this email. Please sign in instead.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters.';
+    case 'auth/user-not-found':
+      return 'No account found with this email. Please create an account.';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Incorrect email or password. Please try again.';
+    case 'auth/too-many-requests':
+      return 'Access temporarily blocked due to multiple failed login attempts. Please reset your password or try again later.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection and try again.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Please contact support.';
+    default:
+      return error?.message || 'Authentication failed. Please try again.';
+  }
+}
+
+export type EmailAuthResult =
+  | {
+      success: true;
+      firebaseUser: FirebaseUser;
+      isNewUser?: boolean;
+    }
+  | {
+      success: false;
+      error?: string;
+    };
+
+/**
+ * Signs in user with Email and Password.
+ */
+export async function signInWithEmailPassword(
+  email: string,
+  password: string
+): Promise<EmailAuthResult> {
+  try {
+    const auth = getAuth();
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      return { success: false, error: 'Please enter both email and password.' };
+    }
+
+    const userCredential = await fbSignInWithEmail(auth, cleanEmail, password);
+    return {
+      success: true,
+      firebaseUser: userCredential.user,
+      isNewUser: false,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: mapFirebaseAuthError(error),
+    };
+  }
+}
+
+/**
+ * Creates a new user account with Email and Password.
+ */
+export async function signUpWithEmailPassword(
+  email: string,
+  password: string,
+  displayName?: string
+): Promise<EmailAuthResult> {
+  try {
+    const auth = getAuth();
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      return { success: false, error: 'Please enter both email and password.' };
+    }
+    if (password.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters.' };
+    }
+
+    const userCredential = await fbCreateUserWithEmail(auth, cleanEmail, password);
+    const user = userCredential.user;
+
+    if (displayName && displayName.trim()) {
+      try {
+        await updateProfile(user, { displayName: displayName.trim() });
+      } catch (profileErr) {
+        console.warn('Profile update warning:', profileErr);
+      }
+    }
+
+    return {
+      success: true,
+      firebaseUser: user,
+      isNewUser: true,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: mapFirebaseAuthError(error),
+    };
+  }
+}
+
+/**
+ * Sends a password reset email.
+ */
+export async function sendPasswordReset(
+  email: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const auth = getAuth();
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      return { success: false, error: 'Please enter your email address.' };
+    }
+
+    await fbSendPasswordResetEmail(auth, cleanEmail);
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: mapFirebaseAuthError(error),
+    };
+  }
+}
 
 export const GOOGLE_WEB_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
@@ -177,7 +313,10 @@ export async function signOut(): Promise<void> {
   }
 
   try {
-    await GoogleOneTapSignIn.signOut();
+    await Promise.race([
+      GoogleOneTapSignIn.signOut(),
+      new Promise((resolve) => setTimeout(resolve, 500)),
+    ]);
   } catch (error) {
     console.warn('Error signing out of Google One Tap:', error);
   }

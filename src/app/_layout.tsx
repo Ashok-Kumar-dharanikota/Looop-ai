@@ -45,7 +45,9 @@ import {
   initializePurchases,
   logInRevenueCat,
   logOutRevenueCat,
+  handleRevenueCatUrl,
 } from '@/services/purchases';
+import * as Linking from 'expo-linking';
 import { registerBackgroundStoryWorker } from '@/services/background-story-task';
 
 if (!__DEV__) {
@@ -105,8 +107,10 @@ export default function RootLayout() {
       } else {
         // Only clear store user if previously signed in with Firebase and NOT in Guest mode
         if (wasPreviouslyAuthenticated && !isGuest) {
+          wasPreviouslyAuthenticated = false;
           useUserStore.getState().clearUser();
           logOutRevenueCat();
+          router.replace('/' as any);
         }
       }
     });
@@ -143,6 +147,23 @@ export default function RootLayout() {
       }
     });
 
+    // 4. RevenueCat Custom Scheme & Deep Link Handler (rc-9566e62f81)
+    const handleDeepLink = async (url: string | null) => {
+      if (!url) return;
+      const handled = await handleRevenueCatUrl(url);
+      if (handled) return;
+
+      // Direct paywall navigation or preview triggered via deep link
+      if (url.includes('paywall') || url.startsWith('rc-')) {
+        router.push('/paywall' as any);
+      }
+    };
+
+    Linking.getInitialURL().then(handleDeepLink);
+    const linkingSubscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
+    });
+
     async function prepare() {
       try {
         await initializeDatabase();
@@ -162,6 +183,7 @@ export default function RootLayout() {
     return () => {
       unsubscribeAuth();
       notificationSubscription.remove();
+      linkingSubscription.remove();
     };
   }, [router]);
 
@@ -182,6 +204,7 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           <Stack screenOptions={{ headerShown: false, animation: 'default' }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="auth" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="onboarding" />
             <Stack.Screen name="paywall" />
             <Stack.Screen name="(tabs)" />

@@ -28,7 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: getAppName(),
     slug: 'Looop',
     version: '1.0.0',
-    scheme: isProd ? 'looop' : `looop-${APP_VARIANT}`,
+    scheme: [isProd ? 'looop' : `looop-${APP_VARIANT}`, 'rc-9566e62f81'],
     orientation: 'portrait',
     icon: './assets/appicons/logo.png',
     userInterfaceStyle: 'automatic',
@@ -102,6 +102,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: '2929675f-fa56-4984-8e52-3a425e713acd',
       },
       appVariant: APP_VARIANT,
+      revenueCatApiKey: isProd
+        ? (process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY || 'goog_dzjPDHMumJlxTZoezkqkvhTssOL')
+        : (process.env.EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY || 'test_PQqcemFHZczwGcsVHrQLSXtLzML'),
       previewDebugToken: '90C2C9E8-5F63-4A15-88E1-216179365622',
     },
     owner: 'ashdpauls-team',

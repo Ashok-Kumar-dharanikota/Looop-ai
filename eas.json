@@ -8,7 +8,9 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "APP_VARIANT": "development"
+        "APP_VARIANT": "development",
+        "EXPO_PUBLIC_APP_VARIANT": "development",
+        "EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY": "test_PQqcemFHZczwGcsVHrQLSXtLzML"
       },
       "android": {
         "buildType": "apk"
@@ -19,7 +21,9 @@
       "channel": "preview",
       "env": {
         "APP_VARIANT": "preview",
-        "EXPO_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN": "90C2C9E8-5F63-4A15-88E1-216179365622"
+        "EXPO_PUBLIC_APP_VARIANT": "preview",
+        "EXPO_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN": "90C2C9E8-5F63-4A15-88E1-216179365622",
+        "EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY": "test_PQqcemFHZczwGcsVHrQLSXtLzML"
       },
       "android": {
         "buildType": "apk"
@@ -29,7 +33,9 @@
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "APP_VARIANT": "production"
+        "APP_VARIANT": "production",
+        "EXPO_PUBLIC_APP_VARIANT": "production",
+        "EXPO_PUBLIC_REVENUECAT_GOOGLE_API_KEY": "goog_dzjPDHMumJlxTZoezkqkvhTssOL"
       }
     }
   },

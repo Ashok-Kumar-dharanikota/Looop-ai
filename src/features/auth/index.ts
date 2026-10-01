@@ -1,8 +1,10 @@
-// Screen
+// Screens
 export { AuthScreen } from './components/AuthScreen';
+export { AuthenticationScreen } from './components/AuthenticationScreen';
 
 // Components
 export { BrandHeader } from './components/BrandHeader';
+export { EmailAuthCard } from './components/EmailAuthCard';
 export { GoogleSignInButton } from './components/GoogleSignInButton';
 export { GuestLoginCard } from './components/GuestLoginCard';
 export { LegalFooter } from './components/LegalFooter';
